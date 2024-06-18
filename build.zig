@@ -29,10 +29,12 @@ pub fn build(b: *std.Build) void {
     // running `zig build`).
     // b.installArtifact(lib);
 
+    const headers = "./inc/";
     const files = [_][]const u8 {"./src/main.cpp"}; 
     const flags = [_][]const u8 {"-std=c++11", 
                                 "-pedantic-errors", 
-                                "-Wall", "-Wextra", "-g"};
+                                "-Wall", "-Wextra", "-g",
+                                "-I", headers};
 
     const exe = b.addExecutable(.{
         .name = "ray_tracing",
