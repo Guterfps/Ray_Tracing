@@ -1,6 +1,8 @@
 
 #include <iostream>
 
+#include "color.hpp"
+
 int main(void) {
 
     size_t image_width = 256;
@@ -13,15 +15,10 @@ int main(void) {
         (image_height - j) << ' ' << std::flush;
         
         for (size_t i = 0; i < image_width; ++i) {
-            double r = static_cast<double>(i) / (image_width - 1);
-            double g = static_cast<double>(j) / (image_height - 1);
-            double b = 0.0;
-
-            int ir = static_cast<int>(255.999 * r);
-            int ig = static_cast<int>(255.999 * g);
-            int ib = static_cast<int>(255.999 * b);
-
-            std::cout << ir << ' ' << ig << ' ' << ib << '\n';
+            RayTracing::Color pixel_color(static_cast<double>(i) / image_width,
+                                        static_cast<double>(j) / image_height, 
+                                        0.0);
+            RayTracing::WriteColor(std::cout, pixel_color);
         }
     }
 
