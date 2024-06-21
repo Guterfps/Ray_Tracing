@@ -17,6 +17,8 @@ public:
     double GetG() const;
     double GetB() const;
 
+    explicit operator Vec3() const;
+
 private:
     Vec3 m_rgb;
 };
@@ -37,6 +39,10 @@ inline double Color::GetG() const {
 
 inline double Color::GetB() const {
     return m_rgb.GetZ();
+}
+
+inline Color::operator Vec3() const {
+    return m_rgb;
 }
 
 // non member functions
