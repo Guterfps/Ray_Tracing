@@ -61,7 +61,7 @@ bool Sphere::Hit(const Ray& ray,
     return true;
 }
 
-inline static bool NotInRange(double num, double min, double max) {
+inline bool Sphere::NotInRange(double num, double min, double max) {
     return ((num <= min) || (num >= max));
 }
 
