@@ -30,11 +30,18 @@ pub fn build(b: *std.Build) void {
     // b.installArtifact(lib);
 
     const headers = "./inc/";
-    const files = [_][]const u8 {"./src/main.cpp"}; 
+    const files = [_][]const u8 {"./src/main.cpp"};
     const flags = [_][]const u8 {"-std=c++11", 
                                 "-pedantic-errors", 
-                                "-Wall", "-Wextra", "-g",
+                                "-Wall", "-Wextra",
                                 "-I", headers};
+    const debug_flags = [_][]const u8 {"-g", ""};
+    const release_flags = [_][]const u8 {"-DNDEBUG", "-O3"};
+
+    const final_flags = flags ++ 
+    if (optimize == .Debug) debug_flags else release_flags;
+
+    // std.debug.print("c++ flags: {s}", .{final_flags});
 
     const exe = b.addExecutable(.{
         .name = "ray_tracing",
@@ -43,7 +50,7 @@ pub fn build(b: *std.Build) void {
     });
     exe.addCSourceFiles(.{
         .files = &files,
-        .flags = &flags,
+        .flags = &final_flags ,
     });
     exe.linkLibC();
     exe.linkLibCpp();
