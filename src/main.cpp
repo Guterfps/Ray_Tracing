@@ -6,6 +6,9 @@
 #include "vec3.hpp"
 
 RayTracing::Color RayColor(const RayTracing::Ray& ray);
+double HitSphere(const RayTracing::Point3& center, 
+                double radius, 
+                const RayTracing::Ray& ray);
 
 int main(void) {
 
@@ -61,6 +64,15 @@ int main(void) {
 }
 
 RayTracing::Color RayColor(const RayTracing::Ray& ray) {
+    RayTracing::Point3 center(0.0, 0.0, -1.0);
+    double t = HitSphere(center, 0.5, ray);
+    if (t > 0.0) {
+        RayTracing::Vec3 normal = RayTracing::UnitVector(ray.At(t) - center);
+        RayTracing::Vec3 rgb = 0.5 * RayTracing::Vec3(normal.GetX() + 1, 
+                                normal.GetY() + 1, normal.GetZ() + 1);
+        return RayTracing::Color(rgb.GetX(), rgb.GetY(), rgb.GetZ());
+    }
+    
     // linear interpolation
     
     RayTracing::Vec3 unit_direction = RayTracing::UnitVector(ray.GetDirection());
@@ -70,4 +82,22 @@ RayTracing::Color RayColor(const RayTracing::Ray& ray) {
             a * static_cast<RayTracing::Vec3>(RayTracing::Color(0.5, 0.7, 1.0)); 
     
     return RayTracing::Color(v.GetX(), v.GetY(), v.GetZ());
+}
+
+double HitSphere(const RayTracing::Point3& center, 
+                double radius, 
+                const RayTracing::Ray& ray) {
+    RayTracing::Vec3 oc = center - ray.GetOrigin();
+    RayTracing::Vec3 d = ray.GetDirection();
+    double a = d.LengthSquared();
+    double h = RayTracing::Dot(d, oc);
+    double c = oc.LengthSquared() - radius * radius;
+    double discriminant = h * h - a * c;
+
+    if (discriminant < 0) {
+        return -1.0;
+    } 
+    else {
+        return ((h - std::sqrt(discriminant)) / a);
+    }
 }
