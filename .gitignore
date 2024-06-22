@@ -1,3 +1,4 @@
 .zig-cache/
 zig-cache/
 ray_tracing
+.vscode

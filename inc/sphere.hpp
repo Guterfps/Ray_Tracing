@@ -54,8 +54,9 @@ bool Sphere::Hit(const Ray& ray,
     }
 
     rec.point = ray.At(root);
-    rec.normal = (rec.point - m_center) / m_radius;
     rec.t = root;
+    Vec3 outward_normal = (rec.point - m_center) / m_radius;
+    rec.SetFaceNormal(ray, outward_normal);
 
     return true;
 }
