@@ -47,7 +47,7 @@ inline Color::operator Vec3() const {
 
 // non member functions
 
-void WriteColor(std::ostream& out, const Color& pixel_color) {
+inline void WriteColor(std::ostream& out, const Color& pixel_color) {
     double r = pixel_color.GetR();
     double g = pixel_color.GetG();
     double b = pixel_color.GetB();

@@ -25,9 +25,6 @@ private:
     double m_max;
 };
 
-const Interval Interval::EMPTY{+INF, - INF};
-const Interval Interval::UNIVERSE{+INF, - INF};
-
 inline Interval::Interval() : m_min(+INF), m_max(-INF) 
 {}
 

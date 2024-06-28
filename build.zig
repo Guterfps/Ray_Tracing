@@ -3,7 +3,7 @@ const std = @import("std");
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
 // runner.
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
@@ -30,7 +30,13 @@ pub fn build(b: *std.Build) void {
     // b.installArtifact(lib);
 
     const headers = "./inc/";
-    const files = [_][]const u8 {"./src/main.cpp"};
+    var files = std.ArrayList([]const u8).init(b.allocator);
+    defer files.deinit();
+    
+    try SearchSourceFiles(b, &files);
+
+    // std.debug.print("files: {s}\n", .{files.items});
+
     const flags = [_][]const u8 {"-std=c++11", 
                                 "-pedantic-errors", 
                                 "-Wall", "-Wextra",
@@ -49,7 +55,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
     exe.addCSourceFiles(.{
-        .files = &files,
+        .files = files.items,
         .flags = &final_flags ,
     });
     exe.linkLibC();
@@ -107,4 +113,32 @@ pub fn build(b: *std.Build) void {
     // const test_step = b.step("test", "Run unit tests");
     // test_step.dependOn(&run_lib_unit_tests.step);
     // test_step.dependOn(&run_exe_unit_tests.step);
+}
+
+fn SearchSourceFiles(b: *std.Build, files: *std.ArrayList([]const u8)) !void {
+    var dir = try std.fs.cwd().openDir("src", .{ .iterate = true });
+
+    var walker = try dir.walk(b.allocator);
+    defer walker.deinit();
+
+    const allowed_exts = [_][]const u8{".cpp",".c++"};
+    while (try walker.next()) |entry| {
+        const ext = std.fs.path.extension(entry.basename);
+        const include_file = for (allowed_exts) |e| {
+            if (std.mem.eql(u8, ext, e))
+                break true;
+        } else false;
+        if (include_file) {
+            // we have to clone the path as walker.next() or walker.deinit() will override/kill it
+            var path = std.ArrayList(u8).init(b.allocator);
+            defer path.deinit();
+            
+            var writer = path.writer();
+
+            try writer.writeAll("src/");
+            try writer.writeAll(entry.path);
+            
+            try files.append(b.dupe(path.items));
+        }
+    }
 }
