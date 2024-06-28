@@ -18,8 +18,7 @@ public:
     void Add(std::shared_ptr<Hittable> obj);
     
     bool Hit(const Ray& ray, 
-            double ray_tmin,
-            double ray_tmax,
+            const Interval& ray_t,
             HitRecord& rec) const override;
 
 private:
@@ -42,16 +41,15 @@ inline void HittableList::Add(std::shared_ptr<Hittable> obj) {
 }
 
 bool HittableList::Hit(const Ray& ray, 
-            double ray_tmin,
-            double ray_tmax,
+            const Interval& ray_t,
             HitRecord& rec) const {
     HitRecord tmp_rec;
     bool hit_anything = false;
-    double closest_so_far = ray_tmax;
+    double closest_so_far = ray_t.GetMax();
     std::vector<std::shared_ptr<Hittable>>::const_iterator cit;
 
     for (const auto& object : m_objects) {
-        if (object->Hit(ray, ray_tmin, closest_so_far, tmp_rec)) {
+        if (object->Hit(ray, Interval(ray_t.GetMin(), closest_so_far), tmp_rec)) {
             hit_anything = true;
             closest_so_far = tmp_rec.t;
             rec = std::move(tmp_rec);

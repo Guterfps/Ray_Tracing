@@ -13,15 +13,12 @@ public:
     Sphere(const Point3& center, double radius);
 
     bool Hit(const Ray& ray,
-            double ray_tmin,
-            double ray_tmax,
+            const Interval& ray_t,
             HitRecord& rec) const override;
 
 private:
     Point3 m_center;
     double m_radius;
-
-    static bool NotInRange(double num, double min, double max);
 
 };
 
@@ -29,8 +26,7 @@ inline Sphere::Sphere(const Point3& center, double radius) :
 m_center(center), m_radius(radius) {}
 
 bool Sphere::Hit(const Ray& ray,
-            double ray_tmin,
-            double ray_tmax,
+            const Interval& ray_t,
             HitRecord& rec) const {
     RayTracing::Vec3 oc = m_center - ray.GetOrigin();
     RayTracing::Vec3 d = ray.GetDirection();
@@ -46,9 +42,9 @@ bool Sphere::Hit(const Ray& ray,
     double sqrtd = std::sqrt(discriminant);
 
     double root = (h - sqrtd) / a;
-    if (NotInRange(root, ray_tmin, ray_tmax)) {
+    if (!ray_t.Surrounds(root)) {
         root = (h + sqrtd) / a;
-        if (NotInRange(root, ray_tmin, ray_tmax)) {
+        if (!ray_t.Surrounds(root)) {
             return false;
         }
     }
@@ -59,10 +55,6 @@ bool Sphere::Hit(const Ray& ray,
     rec.SetFaceNormal(ray, outward_normal);
 
     return true;
-}
-
-inline bool Sphere::NotInRange(double num, double min, double max) {
-    return ((num <= min) || (num >= max));
 }
 
 }

@@ -8,6 +8,7 @@
 #include "hittable_list.hpp"
 #include "sphere.hpp"
 #include "utils.hpp"
+#include "interval.hpp"
 
 RayTracing::Color RayColor(const RayTracing::Ray& ray,
                         const RayTracing::Hittable& world);
@@ -81,7 +82,7 @@ RayTracing::Color RayColor(const RayTracing::Ray& ray,
                         const RayTracing::Hittable& world) {
     RayTracing::HitRecord rec;
 
-    if (world.Hit(ray, 0.0, RayTracing::INF, rec)) {
+    if (world.Hit(ray, RayTracing::Interval(0.0, RayTracing::INF), rec)) {
         RayTracing::Vec3 rgb = 0.5 * 
                         (rec.normal + RayTracing::Vec3(1.0, 1.0, 1.0));
         

@@ -4,6 +4,7 @@
 
 #include "ray.hpp"
 #include "vec3.hpp"
+#include "interval.hpp"
 
 namespace RayTracing {
 
@@ -22,8 +23,7 @@ public:
     virtual ~Hittable() = default;
 
     virtual bool Hit(const Ray& ray, 
-                    double ray_tmin, 
-                    double ray_tmax, 
+                    const Interval& ray_t, 
                     HitRecord& rec) const =0;
 };
 
