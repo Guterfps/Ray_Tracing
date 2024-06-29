@@ -1,5 +1,6 @@
 
 #include "camera.hpp"
+#include "utils.hpp"
 
 namespace RayTracing {
 
@@ -13,13 +14,15 @@ void Camera::Render(const Hittable& world) {
         (m_image_height - j) << ' ' << std::flush;
         
         for (size_t i = 0; i < m_image_width; ++i) {
-            Point3 pixel_center = m_pixel00_loc + 
-                                (i * m_pixel_delta_u) + (j * m_pixel_delta_v);
-            Vec3 ray_direction = pixel_center - m_center;
-            Ray ray(m_center, ray_direction);
+            Color pixel_color(0.0, 0.0, 0.0);
 
-            Color pixel_color = RayColor(ray, world);
-            WriteColor(std::cout, pixel_color);
+            for (size_t sample = 0; sample < m_samples_per_pixel; ++sample) {
+                Ray ray = GetRay(i, j);
+                pixel_color += RayColor(ray, world);
+            }
+
+            WriteColor(std::cout, 
+                    m_pixel_samples_scale * static_cast<Vec3>(pixel_color));
         }
     }
 
@@ -27,9 +30,11 @@ void Camera::Render(const Hittable& world) {
 }
 
 void Camera::Initialize() {
-    m_image_height = static_cast<size_t>(m_image_width / m_aspect_ratio);
+    m_image_height = static_cast<uint32_t>(m_image_width / m_aspect_ratio);
     m_image_height = (m_image_height < 1) ? 1 : m_image_height;
 
+    m_pixel_samples_scale = 1.0 / m_samples_per_pixel;
+    
     m_center = Point3(0.0, 0.0, 0.0);
     
     double focal_length = 1.0;
@@ -69,6 +74,22 @@ Color Camera::RayColor(const Ray& ray, const Hittable& world) const {
             a * static_cast<RayTracing::Vec3>(RayTracing::Color(0.5, 0.7, 1.0)); 
     
     return RayTracing::Color(v.GetX(), v.GetY(), v.GetZ());
+}
+
+Ray Camera::GetRay(size_t i, size_t j) const {
+    Vec3 offset = SampleSqure();
+    Point3 pixel_sample = m_pixel00_loc 
+                        + ((i + offset.GetX()) * m_pixel_delta_u)
+                        + ((j + offset.GetY()) * m_pixel_delta_v);
+
+    Point3 ray_origin = m_center;
+    Vec3 ray_direction = pixel_sample - ray_origin;
+
+    return Ray(ray_origin, ray_direction);
+}
+
+inline Vec3 Camera::SampleSqure() {
+    return (Vec3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0.0));
 }
 
 }

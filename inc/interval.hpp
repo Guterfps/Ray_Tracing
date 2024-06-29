@@ -19,6 +19,7 @@ public:
     double Size() const;
     bool Contains(double x) const;
     bool Surrounds(double x) const;
+    double Clamp(double x) const;
 
 private:
     double m_min;
@@ -49,6 +50,10 @@ inline bool Interval::Contains(double x) const {
 
 inline bool Interval::Surrounds(double x) const {
     return ((x > m_min) && (x < m_max));
+}
+
+inline double Interval::Clamp(double x) const {
+    return ((x < m_min) ? m_min : ((x > m_max) ? m_max : x));
 }
 
 }
