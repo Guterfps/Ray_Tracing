@@ -22,7 +22,7 @@ void Camera::Render(const Hittable& world) {
             }
 
             WriteColor(std::cout, 
-                    m_pixel_samples_scale * static_cast<Vec3>(pixel_color));
+                    Color(m_pixel_samples_scale * static_cast<Vec3>(pixel_color)));
         }
     }
 
@@ -66,11 +66,15 @@ Color Camera::RayColor(const Ray& ray,
 
     // Interval min = 0.001 - Fixing shadow acne
     if (world.Hit(ray, Interval(0.001, RayTracing::INF), rec)) {
-        Vec3 direction = rec.normal + RandomUnitVector();
+        Ray scattered;
+        Color attenuation;
         
-        return Color(0.5 * 
-                static_cast<Vec3>(RayColor(Ray(rec.point, direction), 
-                                    depth - 1 ,world)));
+        if (rec.mat->Scatter(ray, rec, attenuation, scattered)) {
+            return Color(static_cast<Vec3>(attenuation) * 
+                    static_cast<Vec3>(RayColor(scattered, depth - 1, world)));
+        }
+
+        return Color(0.0, 0.0, 0.0);
     }
     
     // linear interpolation

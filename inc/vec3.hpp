@@ -30,6 +30,7 @@ public:
 
     double Length() const;
     double LengthSquared() const;
+    bool NearZero() const;
 
     static Vec3 Random();
     static Vec3 Random(double min, double max);
@@ -95,6 +96,14 @@ inline double Vec3::LengthSquared() const {
     return (m_e[Cord::X] * m_e[Cord::X] +
             m_e[Cord::Y] * m_e[Cord::Y] +
             m_e[Cord::Z] * m_e[Cord::Z]);
+}
+
+inline bool Vec3::NearZero() const {
+    double s = 1.0e-8;
+
+    return ((std::fabs(m_e[Cord::X]) < s) && 
+            (std::fabs(m_e[Cord::Y]) < s) &&
+            (std::fabs(m_e[Cord::Z]) < s));
 }
 
 inline Vec3 Vec3::Random() {
@@ -185,6 +194,10 @@ inline Vec3 RandomOnHemisphere(const Vec3& normal) {
 
     return ((Dot(on_unit_sphere, normal) > 0.0) ? 
             on_unit_sphere : -on_unit_sphere);
+}
+
+inline Vec3 Reflect(const Vec3& vec, const Vec3& normal) {
+    return (vec - 2 * Dot(vec, normal) * normal);
 }
 
 } // RayTracing

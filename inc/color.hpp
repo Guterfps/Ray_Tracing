@@ -13,7 +13,7 @@ class Color {
 public:
     Color();
     Color(double r, double g, double b);
-    Color(const Vec3& v);
+    explicit Color(const Vec3& v);
 
     double GetR() const;
     double GetG() const;

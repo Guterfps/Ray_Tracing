@@ -4,6 +4,7 @@
 
 #include "hittable.hpp"
 #include "color.hpp"
+#include "material.hpp"
 
 namespace RayTracing {
 

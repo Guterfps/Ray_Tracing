@@ -10,7 +10,7 @@ namespace RayTracing {
 
 class Sphere : public Hittable {
 public:
-    Sphere(const Point3& center, double radius);
+    Sphere(const Point3& center, double radius, std::shared_ptr<Material> mat);
 
     bool Hit(const Ray& ray,
             const Interval& ray_t,
@@ -18,12 +18,15 @@ public:
 
 private:
     Point3 m_center;
+    std::shared_ptr<Material> m_mat;
     double m_radius;
 
 };
 
-inline Sphere::Sphere(const Point3& center, double radius) :
-m_center(center), m_radius(radius) {}
+inline Sphere::Sphere(const Point3& center, 
+                    double radius,
+                    std::shared_ptr<Material> mat) :
+m_center(center), m_mat(mat), m_radius(std::fmax(0, radius)) {}
 
 bool Sphere::Hit(const Ray& ray,
             const Interval& ray_t,
@@ -53,6 +56,7 @@ bool Sphere::Hit(const Ray& ray,
     rec.t = root;
     Vec3 outward_normal = (rec.point - m_center) / m_radius;
     rec.SetFaceNormal(ray, outward_normal);
+    rec.mat = m_mat;
 
     return true;
 }
