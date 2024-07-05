@@ -64,8 +64,9 @@ Color Camera::RayColor(const Ray& ray,
     
     HitRecord rec;
 
-    if (world.Hit(ray, Interval(0.0, RayTracing::INF), rec)) {
-        Vec3 direction = RandomOnHemisphere(rec.normal);
+    // Interval min = 0.001 - Fixing shadow acne
+    if (world.Hit(ray, Interval(0.001, RayTracing::INF), rec)) {
+        Vec3 direction = rec.normal + RandomUnitVector();
         
         return Color(0.5 * 
                 static_cast<Vec3>(RayColor(Ray(rec.point, direction), 

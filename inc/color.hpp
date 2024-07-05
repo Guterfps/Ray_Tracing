@@ -58,10 +58,18 @@ inline Color& Color::operator+=(const Color& other) {
 
 // non member functions
 
+inline double LinearToGamma(double linear_component) {
+    return ((linear_component > 0.0) ? std::sqrt(linear_component) : 0);
+}
+
 inline void WriteColor(std::ostream& out, const Color& pixel_color) {
     double r = pixel_color.GetR();
     double g = pixel_color.GetG();
     double b = pixel_color.GetB();
+
+    r = LinearToGamma(r);
+    g = LinearToGamma(g);
+    b = LinearToGamma(b);
 
     static const Interval intensity(0.000, 0.999);
     
