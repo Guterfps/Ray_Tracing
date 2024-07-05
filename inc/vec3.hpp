@@ -5,6 +5,8 @@
 #include <cmath>
 #include <iostream>
 
+#include "utils.hpp"
+
 namespace RayTracing {
 
 class Vec3 {
@@ -29,6 +31,8 @@ public:
     double Length() const;
     double LengthSquared() const;
 
+    static Vec3 Random();
+    static Vec3 Random(double min, double max);
 
 private:
     double m_e[NUM_OF_DIM];
@@ -52,7 +56,7 @@ inline double Vec3::GetZ() const {
 }
 
 inline Vec3 Vec3::operator-() const {
-    return (Vec3(-m_e[0], -m_e[1], -m_e[2]));
+    return (Vec3(-m_e[Cord::X], -m_e[Cord::Y], -m_e[Cord::Z]));
 }
 
 inline double Vec3::operator[](Cord i) const {
@@ -91,6 +95,16 @@ inline double Vec3::LengthSquared() const {
     return (m_e[Cord::X] * m_e[Cord::X] +
             m_e[Cord::Y] * m_e[Cord::Y] +
             m_e[Cord::Z] * m_e[Cord::Z]);
+}
+
+inline Vec3 Vec3::Random() {
+    return Vec3(RandomDouble(), RandomDouble(), RandomDouble());
+}
+
+inline Vec3 Vec3::Random(double min, double max) {
+    return Vec3(RandomDouble(min, max), 
+                RandomDouble(min, max), 
+                RandomDouble(min, max));
 }
 
 // point3 is just an alias for vec3, but useful for geometric clarity in the code.
@@ -148,6 +162,29 @@ inline Vec3 Cross(const Vec3& u, const Vec3& v) {
 
 inline Vec3 UnitVector(const Vec3& v) {
     return (v / v.Length());
+}
+
+inline Vec3 RandomInUnitSphere() {
+    bool is_valid = false;
+    Vec3 vec;
+
+    while (!is_valid) {
+        vec = Vec3::Random(-1, 1);
+        is_valid = (vec.LengthSquared() < 1);
+    }
+
+    return vec;
+}
+
+inline Vec3 RandomUnitVector() {
+    return UnitVector(RandomInUnitSphere());
+}
+
+inline Vec3 RandomOnHemisphere(const Vec3& normal) {
+    Vec3 on_unit_sphere = RandomInUnitSphere();
+
+    return ((Dot(on_unit_sphere, normal) > 0.0) ? 
+            on_unit_sphere : -on_unit_sphere);
 }
 
 } // RayTracing

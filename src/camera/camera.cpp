@@ -56,24 +56,24 @@ void Camera::Initialize() {
 }
 
 Color Camera::RayColor(const Ray& ray, const Hittable& world) const {
-    RayTracing::HitRecord rec;
+    HitRecord rec;
 
-    if (world.Hit(ray, RayTracing::Interval(0.0, RayTracing::INF), rec)) {
-        RayTracing::Vec3 rgb = 0.5 * 
-                        (rec.normal + RayTracing::Vec3(1.0, 1.0, 1.0));
+    if (world.Hit(ray, Interval(0.0, RayTracing::INF), rec)) {
+        Vec3 direction = RandomOnHemisphere(rec.normal);
         
-        return RayTracing::Color(rgb.GetX(), rgb.GetY(), rgb.GetZ());
+        return Color(0.5 * 
+                static_cast<Vec3>(RayColor(Ray(rec.point, direction), world)));
     }
     
     // linear interpolation
     
-    RayTracing::Vec3 unit_direction = RayTracing::UnitVector(ray.GetDirection());
+    Vec3 unit_direction = UnitVector(ray.GetDirection());
     double a = 0.5 * (unit_direction.GetY() + 1.0);
-    RayTracing::Vec3 v = (1.0 - a) * 
-            static_cast<RayTracing::Vec3>(RayTracing::Color(1.0, 1.0, 1.0)) + 
-            a * static_cast<RayTracing::Vec3>(RayTracing::Color(0.5, 0.7, 1.0)); 
+    Vec3 v = (1.0 - a) * 
+            static_cast<Vec3>(Color(1.0, 1.0, 1.0)) + 
+            a * static_cast<Vec3>(Color(0.5, 0.7, 1.0)); 
     
-    return RayTracing::Color(v.GetX(), v.GetY(), v.GetZ());
+    return Color(v);
 }
 
 Ray Camera::GetRay(size_t i, size_t j) const {
