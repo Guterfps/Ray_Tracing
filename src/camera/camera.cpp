@@ -18,7 +18,7 @@ void Camera::Render(const Hittable& world) {
 
             for (size_t sample = 0; sample < m_samples_per_pixel; ++sample) {
                 Ray ray = GetRay(i, j);
-                pixel_color += RayColor(ray, world);
+                pixel_color += RayColor(ray, m_max_depth, world);
             }
 
             WriteColor(std::cout, 
@@ -55,14 +55,21 @@ void Camera::Initialize() {
 
 }
 
-Color Camera::RayColor(const Ray& ray, const Hittable& world) const {
+Color Camera::RayColor(const Ray& ray, 
+                    uint32_t depth, 
+                    const Hittable& world) const {
+    if (depth == 0) {
+        return Color(0.0, 0.0, 0.0);
+    }
+    
     HitRecord rec;
 
     if (world.Hit(ray, Interval(0.0, RayTracing::INF), rec)) {
         Vec3 direction = RandomOnHemisphere(rec.normal);
         
         return Color(0.5 * 
-                static_cast<Vec3>(RayColor(Ray(rec.point, direction), world)));
+                static_cast<Vec3>(RayColor(Ray(rec.point, direction), 
+                                    depth - 1 ,world)));
     }
     
     // linear interpolation

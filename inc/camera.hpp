@@ -11,7 +11,8 @@ class Camera {
 public:
     Camera(double aspect_ratio, 
         uint32_t image_width,
-        uint32_t samples_per_pixel);
+        uint32_t samples_per_pixel,
+        uint32_t max_depth);
 
     void Render(const Hittable& world);
 
@@ -25,19 +26,22 @@ private:
     uint32_t m_image_width{100};        // Rendered image width in pixel count
     uint32_t m_image_height;            // Rendered image height
     uint32_t m_samples_per_pixel{10};   // Count of random samples for each pixel
+    uint32_t m_max_depth{10};           // Maximum number of ray bounces into scene
 
     void Initialize();
-    Color RayColor(const Ray& ray, const Hittable& world) const;
+    Color RayColor(const Ray& ray, uint32_t depth, const Hittable& world) const;
     Ray GetRay(size_t i, size_t j) const;
     static Vec3 SampleSqure();
 };
 
 inline Camera::Camera(double aspect_ratio, 
         uint32_t image_width,
-        uint32_t samples_per_pixel) :
+        uint32_t samples_per_pixel,
+        uint32_t max_depth) :
 m_aspect_ratio(aspect_ratio), 
 m_image_width(image_width),
-m_samples_per_pixel(samples_per_pixel) {}
+m_samples_per_pixel(samples_per_pixel),
+m_max_depth(max_depth) {}
 
 }
 
