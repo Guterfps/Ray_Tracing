@@ -200,6 +200,15 @@ inline Vec3 Reflect(const Vec3& vec, const Vec3& normal) {
     return (vec - 2.0 * Dot(vec, normal) * normal);
 }
 
+inline Vec3 Refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
+    double cos_theta = std::fmin(Dot(-uv, n), 1.0);
+    Vec3 ray_out_perp = etai_over_etat * (uv + cos_theta * n);
+    Vec3 ray_out_parallel = 
+    -std::sqrt(std::fabs(1.0 - ray_out_perp.LengthSquared())) * n;
+
+    return (ray_out_perp + ray_out_parallel);
+}
+
 } // RayTracing
 
 #endif // VEC3_HPP

@@ -21,7 +21,7 @@ private:
 };
 
 inline Metal::Metal(const Color& albedo, double fuzz) : 
-m_albedo(albedo), m_fuzz((fuzz < 1.0) ? fuzz : 1)
+m_albedo(albedo), m_fuzz((fuzz < 1.0) ? fuzz : 1.0)
 {}
 
 inline bool Metal::Scatter(const Ray& ray_in,
