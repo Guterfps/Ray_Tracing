@@ -21,9 +21,9 @@ int main(void) {
     auto material_center = std::make_shared<RayTracing::Lambertian>(
                         RayTracing::Color(0.1, 0.2, 0.5));
     auto material_left   = std::make_shared<RayTracing::Metal>(
-                        RayTracing::Color(0.8, 0.8, 0.8));
+                        RayTracing::Color(0.8, 0.8, 0.8), 0.3);
     auto material_right  = std::make_shared<RayTracing::Metal>(
-                        RayTracing::Color(0.8, 0.6, 0.2));
+                        RayTracing::Color(0.8, 0.6, 0.2), 1.0);
 
     world.Add(std::make_shared<RayTracing::Sphere>(
         RayTracing::Point3( 0.0, -100.5, -1.0), 100.0, material_ground));

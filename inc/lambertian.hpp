@@ -8,7 +8,7 @@ namespace RayTracing {
 
 class Lambertian : public Material {
 public:
-    Lambertian(const Color& albedo);
+    explicit Lambertian(const Color& albedo);
 
     bool Scatter(const Ray& ray_in,
                 const HitRecord& rec,

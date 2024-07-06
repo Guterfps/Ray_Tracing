@@ -2,6 +2,8 @@
 #ifndef HITTABLE_HPP
 #define HITTABLE_HPP
 
+#include <memory>
+
 #include "ray.hpp"
 #include "vec3.hpp"
 #include "interval.hpp"

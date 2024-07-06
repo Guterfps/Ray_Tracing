@@ -154,7 +154,7 @@ inline Vec3 operator*(const Vec3& v, double t) {
 }
 
 inline Vec3 operator/(const Vec3& v, double t) {
-    return (v * (1 / t));
+    return (v * (1.0 / t));
 }
 
 inline double Dot(const Vec3& u, const Vec3& v) {
@@ -197,7 +197,7 @@ inline Vec3 RandomOnHemisphere(const Vec3& normal) {
 }
 
 inline Vec3 Reflect(const Vec3& vec, const Vec3& normal) {
-    return (vec - 2 * Dot(vec, normal) * normal);
+    return (vec - 2.0 * Dot(vec, normal) * normal);
 }
 
 } // RayTracing
