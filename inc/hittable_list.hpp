@@ -46,7 +46,6 @@ bool HittableList::Hit(const Ray& ray,
     HitRecord tmp_rec;
     bool hit_anything = false;
     double closest_so_far = ray_t.GetMax();
-    std::vector<std::shared_ptr<Hittable>>::const_iterator cit;
 
     for (const auto& object : m_objects) {
         if (object->Hit(ray, Interval(ray_t.GetMin(), closest_so_far), tmp_rec)) {

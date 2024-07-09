@@ -14,36 +14,71 @@ int main(void) {
     
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
-    double defocus_angle = 10.0;
-    double focus_dist = 3.4;
-    uint32_t image_width = 400;
+    double defocus_angle = 0.6;
+    double focus_dist = 10.0;
+    uint32_t image_width = 1200;
     uint32_t samples_per_pixel = 100;
     uint32_t max_depth = 50;
-    RayTracing::Point3 look_from(-2, 2, 1);
-    RayTracing::Point3 look_at(0, 0, -1);
+    RayTracing::Point3 look_from(13, 2, 3);
+    RayTracing::Point3 look_at(0, 0, 0);
     RayTracing::Vec3 vup(0, 1, 0);
 
-    auto material_ground = std::make_shared<RayTracing::Lambertian>
-                        (RayTracing::Color(0.8, 0.8, 0.0));
-    auto material_center = std::make_shared<RayTracing::Lambertian>(
-                        RayTracing::Color(0.1, 0.2, 0.5));
-    auto material_left = std::make_shared<RayTracing::Dielectric>(
-                        1.50);
-    auto material_bubble = std::make_shared<RayTracing::Dielectric>(
-                        1.00 / 1.50);
-    auto material_right = std::make_shared<RayTracing::Metal>(
-                        RayTracing::Color(0.8, 0.6, 0.2), 1.0);
+    auto ground_material = std::make_shared<RayTracing::Lambertian>(
+                        RayTracing::Color(0.5, 0.5, 0.5));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+            RayTracing::Point3(0.0, -1000.0, 0.0), 1000, ground_material));
+    
+    for (int a = -11; a < 11; ++a) {
+        for (int b = -11; b < 11; ++b) {
+            double choose_mat = RayTracing::RandomDouble();
+            RayTracing::Point3 center(a + 0.1 + 0.9 * RayTracing::RandomDouble(),
+                                    0.2, 
+                                    b + 0.1 + 0.9 * RayTracing::RandomDouble());
+            
+            RayTracing::Point3 p(4.0, 0.2, 0.0);
+            if ((center - p).Length() > 0.9) {
+                std::shared_ptr<RayTracing::Material> sphere_material;
 
+                if (choose_mat < 0.8) {
+                    // diffuse
+                    auto albedo = RayTracing::Color(RayTracing::Vec3::Random() *
+                                RayTracing::Vec3::Random());
+                    sphere_material = std::make_shared<RayTracing::Lambertian>(
+                                    albedo);
+                }
+                else if (choose_mat < 0.95) {
+                    // metal
+                    auto albedo = RayTracing::Color(
+                                RayTracing::Vec3::Random(0.5, 1.0));
+                    auto fuzz = RayTracing::RandomDouble(0.0, 0.5);
+                    sphere_material = std::make_shared<RayTracing::Metal>(
+                                    albedo, fuzz);
+                }
+                else {
+                    // glass
+                    sphere_material = 
+                        std::make_shared<RayTracing::Dielectric>(1.5);
+                }
+
+                world.Add(std::make_shared<RayTracing::Sphere>(
+                            center, 0.2, sphere_material));
+            }
+        }
+    }
+
+    auto material1 = std::make_shared<RayTracing::Dielectric>(1.5);
     world.Add(std::make_shared<RayTracing::Sphere>(
-        RayTracing::Point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+        RayTracing::Point3(0.0, 1.0, 0.0), 1.0, material1));
+
+    auto material2 = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.4, 0.2, 0.1));
     world.Add(std::make_shared<RayTracing::Sphere>(
-        RayTracing::Point3( 0.0,    0.0, -1.2),   0.5, material_center));
+        RayTracing::Point3(-4.0, 1.0, 0.0), 1.0, material2));
+
+    auto material3 = std::make_shared<RayTracing::Metal>(
+                    RayTracing::Color(0.7, 0.6, 0.5), 0.0);
     world.Add(std::make_shared<RayTracing::Sphere>(
-        RayTracing::Point3(-1.0,    0.0, -1.0),   0.5, material_left));
-    world.Add(std::make_shared<RayTracing::Sphere>(
-        RayTracing::Point3(-1.0,    0.0, -1.0), 0.4, material_bubble));
-    world.Add(std::make_shared<RayTracing::Sphere>(
-        RayTracing::Point3( 1.0,    0.0, -1.0),   0.5, material_right));
+        RayTracing::Point3(4.0, 1.0, 0.0), 1.0, material3));
 
 
     RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
