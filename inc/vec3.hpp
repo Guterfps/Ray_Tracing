@@ -173,13 +173,25 @@ inline Vec3 UnitVector(const Vec3& v) {
     return (v / v.Length());
 }
 
+inline Vec3 RandomInUnitDisk() {
+    bool is_valid = false;
+    Vec3 vec;
+
+    while (!is_valid) {
+        vec = Vec3(RandomDouble(-1.0, 1.0), RandomDouble(-1.0, 1.0), 0.0);
+        is_valid = (vec.LengthSquared() < 1.0);
+    }
+
+    return vec;
+}
+
 inline Vec3 RandomInUnitSphere() {
     bool is_valid = false;
     Vec3 vec;
 
     while (!is_valid) {
-        vec = Vec3::Random(-1, 1);
-        is_valid = (vec.LengthSquared() < 1);
+        vec = Vec3::Random(-1.0, 1.0);
+        is_valid = (vec.LengthSquared() < 1.0);
     }
 
     return vec;

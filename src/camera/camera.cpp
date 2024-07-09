@@ -37,10 +37,9 @@ void Camera::Initialize() {
     
     m_center = m_look_from;
     
-    double focal_length = (m_look_from - m_look_at).Length();
     double theta = DegreesToRadians(m_vfov);
     double h = std::tan(theta / 2.0);
-    double viewport_hight = 2.0 * h * focal_length;
+    double viewport_hight = 2.0 * h * m_focus_dist;
     double viewport_width = viewport_hight * 
                         (static_cast<double>(m_image_width) / m_image_height);
 
@@ -54,10 +53,15 @@ void Camera::Initialize() {
     m_pixel_delta_u = viewport_u / m_image_width;
     m_pixel_delta_v = viewport_v / m_image_height;
 
-    Vec3 viewport_upper_left = m_center - (focal_length * m_w) -
+    Vec3 viewport_upper_left = m_center - (m_focus_dist * m_w) -
                             viewport_u / 2 - viewport_v / 2;
     m_pixel00_loc = viewport_upper_left + 
                     (m_pixel_delta_u + m_pixel_delta_v) * 0.5;
+
+    double defocus_radius = m_focus_dist * 
+                        std::tan(DegreesToRadians(m_defocus_angle / 2.0));
+    m_defocus_disk_u = m_u * defocus_radius;
+    m_defocus_disk_v = m_v * defocus_radius;
 
 }
 
@@ -94,16 +98,27 @@ Color Camera::RayColor(const Ray& ray,
     return Color(v);
 }
 
+// Construct a camera ray originating from the defocus disk and directed at a randomly
+// sampled point around the pixel location i, j.
 inline Ray Camera::GetRay(size_t i, size_t j) const {
     Vec3 offset = SampleSqure();
     Point3 pixel_sample = m_pixel00_loc 
                         + ((i + offset.GetX()) * m_pixel_delta_u)
                         + ((j + offset.GetY()) * m_pixel_delta_v);
 
-    Point3 ray_origin = m_center;
+    Point3 ray_origin = (m_defocus_angle <= 0.0) ? 
+                        m_center : DefocusDiskSample();
     Vec3 ray_direction = pixel_sample - ray_origin;
 
     return Ray(ray_origin, ray_direction);
+}
+
+inline Point3 Camera::DefocusDiskSample() const {
+    Point3 p = RandomInUnitDisk();
+
+    return (m_center + 
+        (p[Vec3::Cord::X] * m_defocus_disk_u) +
+        (p[Vec3::Cord::Y] * m_defocus_disk_v));
 }
 
 inline Vec3 Camera::SampleSqure() {
