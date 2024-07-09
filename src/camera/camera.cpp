@@ -35,23 +35,29 @@ void Camera::Initialize() {
 
     m_pixel_samples_scale = 1.0 / m_samples_per_pixel;
     
-    m_center = Point3(0.0, 0.0, 0.0);
+    m_center = m_look_from;
     
-    double focal_length = 1.0;
-    double viewport_hight = 2.0;
+    double focal_length = (m_look_from - m_look_at).Length();
+    double theta = DegreesToRadians(m_vfov);
+    double h = std::tan(theta / 2.0);
+    double viewport_hight = 2.0 * h * focal_length;
     double viewport_width = viewport_hight * 
                         (static_cast<double>(m_image_width) / m_image_height);
 
-    Vec3 viewport_u = Vec3(viewport_width, 0.0, 0.0);
-    Vec3 viewport_v = Vec3(0.0, -viewport_hight, 0.0);
+    m_w = UnitVector(m_look_from - m_look_at);
+    m_u = UnitVector(Cross(m_vup, m_w));
+    m_v = Cross(m_w, m_u);
+    
+    Vec3 viewport_u = viewport_width * m_u;
+    Vec3 viewport_v = viewport_hight * (-m_v);
 
     m_pixel_delta_u = viewport_u / m_image_width;
     m_pixel_delta_v = viewport_v / m_image_height;
 
-    Vec3 viewport_upper_left = m_center - Vec3(0.0, 0.0, focal_length) -
-                                viewport_u / 2 - viewport_v / 2;
+    Vec3 viewport_upper_left = m_center - (focal_length * m_w) -
+                            viewport_u / 2 - viewport_v / 2;
     m_pixel00_loc = viewport_upper_left + 
-                    (m_pixel_delta_u + m_pixel_delta_v) / 2;
+                    (m_pixel_delta_u + m_pixel_delta_v) * 0.5;
 
 }
 
@@ -88,7 +94,7 @@ Color Camera::RayColor(const Ray& ray,
     return Color(v);
 }
 
-Ray Camera::GetRay(size_t i, size_t j) const {
+inline Ray Camera::GetRay(size_t i, size_t j) const {
     Vec3 offset = SampleSqure();
     Point3 pixel_sample = m_pixel00_loc 
                         + ((i + offset.GetX()) * m_pixel_delta_u)

@@ -10,10 +10,14 @@ namespace RayTracing {
 
 class Camera {
 public:
-    Camera(double aspect_ratio, 
-        uint32_t image_width,
-        uint32_t samples_per_pixel,
-        uint32_t max_depth);
+    Camera(double aspect_ratio = 1.0,
+        double vfov = 90.0,
+        uint32_t image_width = 100,
+        uint32_t samples_per_pixel = 10,
+        uint32_t max_depth = 10,
+        Point3 look_from = {0.0, 0.0, 0.0},
+        Point3 look_at = {0.0, 0.0, -1.0},
+        Vec3 vup = {0.0, 1.0, 0.0});
 
     void Render(const Hittable& world);
 
@@ -22,12 +26,17 @@ private:
     Point3 m_pixel00_loc;               // Location of pixel 0, 0
     Vec3 m_pixel_delta_u;               // Offset to pixel to the right
     Vec3 m_pixel_delta_v;               // Offset to pixel below
-    double m_aspect_ratio{1.0};         // Ratio of image width over height
+    Vec3 m_u, m_v, m_w;                 // camera frame basis vectors
+    Point3 m_look_from;                 // point camera is loking from
+    Point3 m_look_at;                   // point camera is loking at
+    Vec3 m_vup;                         // camera relative "up" direction
+    double m_aspect_ratio;              // Ratio of image width over height
     double m_pixel_samples_scale;       // Color scale factor for a sum of pixel samples
-    uint32_t m_image_width{100};        // Rendered image width in pixel count
+    double m_vfov;                      // vertical view angle
+    uint32_t m_image_width;             // Rendered image width in pixel count
     uint32_t m_image_height;            // Rendered image height
-    uint32_t m_samples_per_pixel{10};   // Count of random samples for each pixel
-    uint32_t m_max_depth{10};           // Maximum number of ray bounces into scene
+    uint32_t m_samples_per_pixel;       // Count of random samples for each pixel
+    uint32_t m_max_depth;               // Maximum number of ray bounces into scene
 
     void Initialize();
     Color RayColor(const Ray& ray, uint32_t depth, const Hittable& world) const;
@@ -35,11 +44,19 @@ private:
     static Vec3 SampleSqure();
 };
 
-inline Camera::Camera(double aspect_ratio, 
+inline Camera::Camera(double aspect_ratio,
+        double vfov,
         uint32_t image_width,
         uint32_t samples_per_pixel,
-        uint32_t max_depth) :
-m_aspect_ratio(aspect_ratio), 
+        uint32_t max_depth,
+        Point3 look_from,
+        Point3 look_at,
+        Vec3 vup) :
+m_look_from(look_from),
+m_look_at(look_at),
+m_vup(vup),
+m_aspect_ratio(aspect_ratio),
+m_vfov(vfov),
 m_image_width(image_width),
 m_samples_per_pixel(samples_per_pixel),
 m_max_depth(max_depth) {}

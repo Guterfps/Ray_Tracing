@@ -11,10 +11,15 @@
 
 int main(void) {
     RayTracing::HittableList world;
+    
     double aspect_ratio = 16.0 / 9.0;
+    double vfov = 20.0;
     uint32_t image_width = 400;
     uint32_t samples_per_pixel = 100;
     uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(-2, 2, 1);
+    RayTracing::Point3 look_at(0, 0, -1);
+    RayTracing::Vec3 vup(0, 1, 0);
 
     auto material_ground = std::make_shared<RayTracing::Lambertian>
                         (RayTracing::Color(0.8, 0.8, 0.0));
@@ -39,8 +44,9 @@ int main(void) {
         RayTracing::Point3( 1.0,    0.0, -1.0),   0.5, material_right));
 
 
-    RayTracing::Camera cam(aspect_ratio, image_width, 
-                            samples_per_pixel, max_depth);
+    RayTracing::Camera cam(aspect_ratio, vfov, image_width, 
+                            samples_per_pixel, max_depth,
+                            look_from, look_at, vup);
 
     cam.Render(world);
 
