@@ -1,4 +1,7 @@
 
+#include <future>
+#include <vector>
+
 #include "camera.hpp"
 #include "utils.hpp"
 
@@ -22,8 +25,44 @@ void Camera::Render(const Hittable& world) {
             }
 
             WriteColor(std::cout, 
-                    Color(m_pixel_samples_scale * static_cast<Vec3>(pixel_color)));
+                Color(m_pixel_samples_scale * static_cast<Vec3>(pixel_color)));
         }
+    }
+
+    std::clog << "\rDone.                 \n";
+}
+
+void Camera::Render(const Hittable& world, bool parallel) {
+    Initialize();
+
+    std::vector<std::future<Color>> futers(m_image_height * m_image_width);
+
+    std::cout << "P3\n" << m_image_width << ' ' << m_image_height << "\n255\n";
+
+    for (size_t j = 0; j < m_image_height; ++j) {
+        std::clog << "\rScanlines remaining: " << 
+        (m_image_height - j) << ' ' << std::flush;
+        
+        for (size_t i = 0; i < m_image_width; ++i) {
+            futers[j * m_image_width + i] = std::async(std::launch::async,
+                [this, &world](size_t j, size_t i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+
+                for (size_t sample = 0; sample < m_samples_per_pixel; ++sample) {
+                    Ray ray = GetRay(i, j);
+                    pixel_color += RayColor(ray, m_max_depth, world);
+                }
+
+                return pixel_color;
+            }, j, i);
+        }
+    }
+    
+    for (auto& f : futers) {
+        Color pixel = f.get();
+
+        WriteColor(std::cout, 
+                Color(m_pixel_samples_scale * static_cast<Vec3>(pixel)));
     }
 
     std::clog << "\rDone.                 \n";

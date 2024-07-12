@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <memory>
+#include <chrono>
 
 #include "hittable_list.hpp"
 #include "sphere.hpp"
@@ -85,7 +86,21 @@ int main(void) {
                         image_width, samples_per_pixel, max_depth,
                         look_from, look_at, vup);
 
-    cam.Render(world);
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
 
-      return 0;
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
+
+    t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world);
+    t2 = std::chrono::high_resolution_clock::now();
+    
+    std::chrono::duration<double, std::milli> ms2 = t2 - t1;
+
+    std::clog << "no parallel execution time: " << ms2.count() << '\n';
+    
+    return 0;
 }

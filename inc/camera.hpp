@@ -22,6 +22,7 @@ public:
         Vec3 vup = {0.0, 1.0, 0.0});
 
     void Render(const Hittable& world);
+    void Render(const Hittable& world, bool parallel);
 
 private:
     Point3 m_center;                    // Camera Center
