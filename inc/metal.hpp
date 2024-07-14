@@ -31,7 +31,7 @@ inline bool Metal::Scatter(const Ray& ray_in,
     Vec3 reflected = Reflect(ray_in.GetDirection(), rec.normal);
     
     reflected = UnitVector(reflected) + (m_fuzz * RandomUnitVector());
-    scatterd = Ray(rec.point, reflected);
+    scatterd = Ray(rec.point, reflected, ray_in.GetTime());
     attenuation = m_albedo;
 
     return (Dot(scatterd.GetDirection(), rec.normal) > 0.0);

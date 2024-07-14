@@ -32,7 +32,7 @@ inline bool Lambertian::Scatter(const Ray& ray_in,
         scatter_direction = rec.normal;
     }
     
-    scatterd = Ray(rec.point, scatter_direction);
+    scatterd = Ray(rec.point, scatter_direction, ray_in.GetTime());
     attenuation = m_albedo;
 
     (void)ray_in;

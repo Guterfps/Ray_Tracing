@@ -11,6 +11,8 @@ namespace RayTracing {
 class Sphere : public Hittable {
 public:
     Sphere(const Point3& center, double radius, std::shared_ptr<Material> mat);
+    Sphere(const Point3& center1, const Point3& center2, 
+        double radius, std::shared_ptr<Material> mat);
 
     bool Hit(const Ray& ray,
             const Interval& ray_t,
@@ -18,48 +20,27 @@ public:
 
 private:
     Point3 m_center;
+    Vec3 m_center_vec;
     std::shared_ptr<Material> m_mat;
     double m_radius;
+    bool m_is_moving;
+
+    Point3 SphereCenter(double time) const;
 
 };
 
 inline Sphere::Sphere(const Point3& center, 
                     double radius,
                     std::shared_ptr<Material> mat) :
-m_center(center), m_mat(mat), m_radius(std::fmax(0, radius)) {}
+m_center(center), m_center_vec(), m_mat(mat), 
+m_radius(std::fmax(0, radius)), m_is_moving(false) 
+{}
 
-bool Sphere::Hit(const Ray& ray,
-            const Interval& ray_t,
-            HitRecord& rec) const {
-    RayTracing::Vec3 oc = m_center - ray.GetOrigin();
-    RayTracing::Vec3 d = ray.GetDirection();
-    double a = d.LengthSquared();
-    double h = RayTracing::Dot(d, oc);
-    double c = oc.LengthSquared() - m_radius * m_radius;
-    double discriminant = h * h - a * c;
-
-    if (discriminant < 0) {
-        return false;
-    }
-
-    double sqrtd = std::sqrt(discriminant);
-
-    double root = (h - sqrtd) / a;
-    if (!ray_t.Surrounds(root)) {
-        root = (h + sqrtd) / a;
-        if (!ray_t.Surrounds(root)) {
-            return false;
-        }
-    }
-
-    rec.point = ray.At(root);
-    rec.t = root;
-    Vec3 outward_normal = (rec.point - m_center) / m_radius;
-    rec.SetFaceNormal(ray, outward_normal);
-    rec.mat = m_mat;
-
-    return true;
-}
+inline Sphere::Sphere(const Point3& center1, const Point3& center2, 
+        double radius, std::shared_ptr<Material> mat) :
+m_center(center1), m_center_vec(center2 - center1), m_mat(mat), 
+m_radius(std::fmax(0, radius)), m_is_moving(true)
+{}
 
 }
 

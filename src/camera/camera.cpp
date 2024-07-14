@@ -148,8 +148,9 @@ inline Ray Camera::GetRay(size_t i, size_t j) const {
     Point3 ray_origin = (m_defocus_angle <= 0.0) ? 
                         m_center : DefocusDiskSample();
     Vec3 ray_direction = pixel_sample - ray_origin;
+    double ray_time = RandomDouble();
 
-    return Ray(ray_origin, ray_direction);
+    return Ray(ray_origin, ray_direction, ray_time);
 }
 
 inline Point3 Camera::DefocusDiskSample() const {

@@ -49,7 +49,7 @@ inline bool Dielectric::Scatter(const Ray& ray_in,
         direction = Refract(unit_direction, rec.normal, ri);
     }
 
-    scatterd = Ray(rec.point, direction);
+    scatterd = Ray(rec.point, direction, ray_in.GetTime());
 
     return true;
 }

@@ -17,7 +17,7 @@ int main(void) {
     double vfov = 20.0;
     double defocus_angle = 0.6;
     double focus_dist = 10.0;
-    uint32_t image_width = 1200;
+    uint32_t image_width = 400;
     uint32_t samples_per_pixel = 100;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(13, 2, 3);
@@ -32,9 +32,9 @@ int main(void) {
     for (int a = -11; a < 11; ++a) {
         for (int b = -11; b < 11; ++b) {
             double choose_mat = RayTracing::RandomDouble();
-            RayTracing::Point3 center(a + 0.1 + 0.9 * RayTracing::RandomDouble(),
+            RayTracing::Point3 center(a + 0.9 * RayTracing::RandomDouble(),
                                     0.2, 
-                                    b + 0.1 + 0.9 * RayTracing::RandomDouble());
+                                    b + 0.9 * RayTracing::RandomDouble());
             
             RayTracing::Point3 p(4.0, 0.2, 0.0);
             if ((center - p).Length() > 0.9) {
@@ -46,6 +46,11 @@ int main(void) {
                                 RayTracing::Vec3::Random());
                     sphere_material = std::make_shared<RayTracing::Lambertian>(
                                     albedo);
+                    auto center2 = center + 
+                        RayTracing::Vec3(0, RayTracing::RandomDouble(0, 0.5), 0);
+                    
+                    world.Add(std::make_shared<RayTracing::Sphere>(
+                            center, center2, 0.2, sphere_material));
                 }
                 else if (choose_mat < 0.95) {
                     // metal
@@ -54,15 +59,16 @@ int main(void) {
                     auto fuzz = RayTracing::RandomDouble(0.0, 0.5);
                     sphere_material = std::make_shared<RayTracing::Metal>(
                                     albedo, fuzz);
+                    world.Add(std::make_shared<RayTracing::Sphere>(
+                            center, 0.2, sphere_material));
                 }
                 else {
                     // glass
                     sphere_material = 
                         std::make_shared<RayTracing::Dielectric>(1.5);
-                }
-
-                world.Add(std::make_shared<RayTracing::Sphere>(
+                    world.Add(std::make_shared<RayTracing::Sphere>(
                             center, 0.2, sphere_material));
+                }
             }
         }
     }
@@ -94,13 +100,13 @@ int main(void) {
 
     std::clog << "parallel execution time: " << ms.count() << '\n';
 
-    t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world);
-    t2 = std::chrono::high_resolution_clock::now();
+    // t1 = std::chrono::high_resolution_clock::now();
+    // cam.Render(world);
+    // t2 = std::chrono::high_resolution_clock::now();
     
-    std::chrono::duration<double, std::milli> ms2 = t2 - t1;
+    // std::chrono::duration<double, std::milli> ms2 = t2 - t1;
 
-    std::clog << "no parallel execution time: " << ms2.count() << '\n';
+    // std::clog << "no parallel execution time: " << ms2.count() << '\n';
     
     return 0;
 }
