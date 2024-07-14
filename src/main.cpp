@@ -9,6 +9,7 @@
 #include "lambertian.hpp"
 #include "metal.hpp"
 #include "dielectric.hpp"
+#include "bvh.hpp"
 
 int main(void) {
     RayTracing::HittableList world;
@@ -87,6 +88,10 @@ int main(void) {
     world.Add(std::make_shared<RayTracing::Sphere>(
         RayTracing::Point3(4.0, 1.0, 0.0), 1.0, material3));
 
+
+    world = RayTracing::HittableList(
+            std::vector<std::shared_ptr<RayTracing::Hittable>>{
+            std::make_shared<RayTracing::BVHNode>(world)});
 
     RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
                         image_width, samples_per_pixel, max_depth,

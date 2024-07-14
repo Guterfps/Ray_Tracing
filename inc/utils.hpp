@@ -25,6 +25,10 @@ inline double RandomDouble(double min, double max) {
     return (min + (max - min) * RandomDouble());
 }
 
+inline int RandomInt(int min, int max) {
+    return static_cast<int>(RandomDouble(min, max + 1));
+}
+
 }
 
 #endif // UTILS_HPP

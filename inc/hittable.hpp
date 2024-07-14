@@ -7,6 +7,7 @@
 #include "ray.hpp"
 #include "vec3.hpp"
 #include "interval.hpp"
+#include "aabb.hpp"
 
 namespace RayTracing {
 
@@ -30,6 +31,7 @@ public:
     virtual bool Hit(const Ray& ray, 
                     const Interval& ray_t, 
                     HitRecord& rec) const =0;
+    virtual AABB BoundingBox() const =0;
 };
 
 inline void HitRecord::SetFaceNormal(const Ray& ray, const Vec3& outward_normal) {

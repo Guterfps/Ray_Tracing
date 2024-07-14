@@ -3,6 +3,13 @@
 
 namespace RayTracing {
 
+HittableList::HittableList(const std::vector<std::shared_ptr<Hittable>>& objs) :
+m_objects(objs) 
+{
+    for (const auto& obj : m_objects) {
+        m_bbox = AABB(m_bbox, obj->BoundingBox());    
+    }
+}
 
 bool HittableList::Hit(const Ray& ray, 
             const Interval& ray_t,
