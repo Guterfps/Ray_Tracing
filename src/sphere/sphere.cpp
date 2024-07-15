@@ -33,6 +33,9 @@ bool Sphere::Hit(const Ray& ray,
     Vec3 outward_normal = (rec.point - center) / m_radius;
     rec.SetFaceNormal(ray, outward_normal);
     rec.mat = m_mat;
+    auto uv = GetSphereUV(outward_normal);
+    rec.u = uv.first;
+    rec.v = uv.second;
 
     return true;
 }

@@ -10,20 +10,34 @@
 #include "metal.hpp"
 #include "dielectric.hpp"
 #include "bvh.hpp"
+#include "checker_texture.hpp"
 
-int main(void) {
+void BouncingSpheres();
+void CheckeredSpheres();
+
+
+int main(int argc, char** argv) {
+    if (argc > 1) {    
+        switch(std::stoi(argv[1])) {
+            case 1: 
+                BouncingSpheres();
+                break;
+            case 2:
+                CheckeredSpheres();
+                break;
+            default:
+            std::clog << "invalid argument(1, 2)\n";
+        }
+    }
+    else {
+        BouncingSpheres();
+    }
+
+    return 0;
+}
+
+void BouncingSpheres() {
     RayTracing::HittableList world;
-    
-    double aspect_ratio = 16.0 / 9.0;
-    double vfov = 20.0;
-    double defocus_angle = 0.6;
-    double focus_dist = 10.0;
-    uint32_t image_width = 400;
-    uint32_t samples_per_pixel = 100;
-    uint32_t max_depth = 50;
-    RayTracing::Point3 look_from(13, 2, 3);
-    RayTracing::Point3 look_at(0, 0, 0);
-    RayTracing::Vec3 vup(0, 1, 0);
 
     auto ground_material = std::make_shared<RayTracing::Lambertian>(
                         RayTracing::Color(0.5, 0.5, 0.5));
@@ -93,6 +107,17 @@ int main(void) {
             std::vector<std::shared_ptr<RayTracing::Hittable>>{
             std::make_shared<RayTracing::BVHNode>(world)});
 
+    double aspect_ratio = 16.0 / 9.0;
+    double vfov = 20.0;
+    double defocus_angle = 0.6;
+    double focus_dist = 10.0;
+    uint32_t image_width = 400;
+    uint32_t samples_per_pixel = 100;
+    uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(13, 2, 3);
+    RayTracing::Point3 look_at(0, 0, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
     RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
                         image_width, samples_per_pixel, max_depth,
                         look_from, look_at, vup);
@@ -113,5 +138,42 @@ int main(void) {
 
     // std::clog << "no parallel execution time: " << ms2.count() << '\n';
     
-    return 0;
+}
+
+void CheckeredSpheres() {
+    RayTracing::HittableList world;
+
+    auto checker = std::make_shared<RayTracing::CheckerTexture>(
+                    0.32, RayTracing::Color(0.2, 0.3, 0.1), 
+                    RayTracing::Color(0.9, 0.9, 0.9));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+        RayTracing::Point3(0.0, -10.0, 0.0), 10.0,
+        std::make_shared<RayTracing::Lambertian>(checker)));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+        RayTracing::Point3(0.0, 10.0, 0.0), 10.0,
+        std::make_shared<RayTracing::Lambertian>(checker)));
+
+    double aspect_ratio = 16.0 / 9.0;
+    double vfov = 20.0;
+    double defocus_angle = 0.0;
+    double focus_dist = 10.0;
+    uint32_t image_width = 400;
+    uint32_t samples_per_pixel = 100;
+    uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(13, 2, 3);
+    RayTracing::Point3 look_at(0, 0, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
+    RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
+                        image_width, samples_per_pixel, max_depth,
+                        look_from, look_at, vup);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
+
 }

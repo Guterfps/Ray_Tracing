@@ -18,6 +18,8 @@ struct HitRecord {
     Vec3 normal;
     std::shared_ptr<Material> mat;
     double t;
+    double u;
+    double v;
     bool front_face;
 
     // NOTE: the parameter `outward_normal` is assumed to have unit length.

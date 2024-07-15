@@ -2,6 +2,8 @@
 #ifndef SPHERE_HPP
 #define SPHERE_HPP
 
+#include <utility>
+
 #include "hittable.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
@@ -31,6 +33,7 @@ private:
     bool m_is_moving;
 
     Point3 SphereCenter(double time) const;
+    static std::pair<double, double> GetSphereUV(const Point3& p);
 
 };
 
@@ -57,6 +60,23 @@ m_radius(std::fmax(0.0, radius)), m_is_moving(true)
 
 inline AABB Sphere::BoundingBox() const {
     return m_bbox;
+}
+
+inline std::pair<double, double> Sphere::GetSphereUV(const Point3& p) {
+    // p: a given point on the sphere of radius one, centered at the origin.
+    // u: returned value [0,1] of angle around the Y axis from X=-1.
+    // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+    //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+    //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+    //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+    
+    double theta = std::acos(-p.GetY());
+    double phi = std::atan2(-p.GetZ(), p.GetX()) + PI;
+    
+    double u = phi / (2 * PI);
+    double v = theta / PI;
+
+    return std::pair(u, v);
 }
 
 }
