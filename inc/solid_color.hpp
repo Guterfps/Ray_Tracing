@@ -26,6 +26,10 @@ SolidColor(Color(r, g, b))
 {}
 
 inline Color SolidColor::Value(double u, double v, const Point3& p) const {
+    (void)u;
+    (void)v;
+    (void)p;
+    
     return m_albedo;
 }
 

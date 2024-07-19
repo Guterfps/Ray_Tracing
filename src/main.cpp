@@ -11,9 +11,11 @@
 #include "dielectric.hpp"
 #include "bvh.hpp"
 #include "checker_texture.hpp"
+#include "image_texture.hpp"
 
 void BouncingSpheres();
 void CheckeredSpheres();
+void Earth();
 
 
 int main(int argc, char** argv) {
@@ -24,6 +26,9 @@ int main(int argc, char** argv) {
                 break;
             case 2:
                 CheckeredSpheres();
+                break;
+            case 3:
+                Earth();
                 break;
             default:
             std::clog << "invalid argument(1, 2)\n";
@@ -176,4 +181,39 @@ void CheckeredSpheres() {
 
     std::clog << "parallel execution time: " << ms.count() << '\n';
 
+}
+
+void Earth() {
+    auto earth_texture = std::make_shared<RayTracing::ImageTexture>(
+                        "earthmap.jpg");
+    auto earth_surface = std::make_shared<RayTracing::Lambertian>(
+                        earth_texture);
+    auto globe = std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(0.0, 0.0, 0.0), 2.0, earth_surface);
+    
+    double aspect_ratio = 16.0 / 9.0;
+    double vfov = 20.0;
+    double defocus_angle = 0.0;
+    double focus_dist = 10.0;
+    uint32_t image_width = 400;
+    uint32_t samples_per_pixel = 100;
+    uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(0, 0, 12);
+    RayTracing::Point3 look_at(0, 0, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
+    RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
+                        image_width, samples_per_pixel, max_depth,
+                        look_from, look_at, vup);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(RayTracing::HittableList(
+            std::vector<std::shared_ptr<RayTracing::Hittable>>{globe}), 
+            true);
+    
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
 }

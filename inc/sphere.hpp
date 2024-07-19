@@ -76,7 +76,7 @@ inline std::pair<double, double> Sphere::GetSphereUV(const Point3& p) {
     double u = phi / (2 * PI);
     double v = theta / PI;
 
-    return std::pair(u, v);
+    return std::pair<double, double>(u, v);
 }
 
 }
