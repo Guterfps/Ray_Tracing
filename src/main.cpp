@@ -226,7 +226,7 @@ void Earth() {
 void PerlinSpheres() {
     RayTracing::HittableList world;
 
-    auto pertext = std::make_shared<RayTracing::NoiseTexture>();
+    auto pertext = std::make_shared<RayTracing::NoiseTexture>(4.0);
     world.Add(std::make_shared<RayTracing::Sphere>(
             RayTracing::Point3(0, -1000, 0), 1000, 
             std::make_shared<RayTracing::Lambertian>(pertext)));
