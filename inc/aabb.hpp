@@ -22,20 +22,22 @@ public:
     Axis LongestAxis() const;
 
     static const AABB EMPTY, UNIVERSE;
+
 private:
     Interval m_x, m_y, m_z;
 
     static Interval ValidInterval(double a, double b);
+    static Interval PadToMinimum(const Interval& inter);
 };
 
 inline AABB::AABB(const Interval& x, const Interval& y, const Interval& z) :
-m_x(x), m_y(y), m_z(z)
+m_x(PadToMinimum(x)), m_y(PadToMinimum(y)), m_z(PadToMinimum(z))
 {}
 
 inline AABB::AABB(const Point3& a, const Point3& b) :
-m_x(ValidInterval(a.GetX(), b.GetX())),
-m_y(ValidInterval(a.GetY(), b.GetY())),
-m_z(ValidInterval(a.GetZ(), b.GetZ()))
+m_x(PadToMinimum(ValidInterval(a.GetX(), b.GetX()))),
+m_y(PadToMinimum(ValidInterval(a.GetY(), b.GetY()))),
+m_z(PadToMinimum(ValidInterval(a.GetZ(), b.GetZ())))
 {}
 
 inline AABB::AABB(const AABB& box0, const AABB& box1) :
@@ -111,6 +113,12 @@ inline AABB::Axis AABB::LongestAxis() const {
     return ((m_x.Size() > m_y.Size()) ? 
             ((m_x.Size() > m_z.Size()) ? Axis::X : Axis::Z) : 
             ((m_y.Size() > m_z.Size()) ? Axis::Y : Axis::Z));
+}
+
+inline Interval AABB::PadToMinimum(const Interval& inter) {
+    static constexpr double delta = 0.0001;
+
+    return ((inter.Size() < delta) ? inter.Expand(delta) : inter);
 }
 
 }

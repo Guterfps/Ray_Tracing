@@ -5,6 +5,7 @@
 
 #include "hittable_list.hpp"
 #include "sphere.hpp"
+#include "quad.hpp"
 #include "camera.hpp"
 #include "lambertian.hpp"
 #include "metal.hpp"
@@ -18,7 +19,7 @@ void BouncingSpheres();
 void CheckeredSpheres();
 void Earth();
 void PerlinSpheres();
-
+void Quads();
 
 int main(int argc, char** argv) {
     if (argc > 1) {    
@@ -34,6 +35,9 @@ int main(int argc, char** argv) {
                 break;
             case 4:
                 PerlinSpheres();
+                break;
+            case 5:
+                Quads();
                 break;
             default:
             std::clog << "invalid argument(1, 2)\n";
@@ -242,6 +246,68 @@ void PerlinSpheres() {
     uint32_t samples_per_pixel = 100;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(13, 2, 3);
+    RayTracing::Point3 look_at(0, 0, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
+    RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
+                        image_width, samples_per_pixel, max_depth,
+                        look_from, look_at, vup);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
+}
+
+void Quads() {
+    RayTracing::HittableList world;
+
+    // Materials
+    auto left_red = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(1.0, 0.2, 0.2));
+    auto back_green = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.2, 1.0, 0.2));
+    auto right_blue = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.2, 0.2, 1.0));
+    auto upper_orange = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(1.0, 0.5, 0.0));
+    auto lower_teal = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.2, 0.8, 0.8));
+
+    // Quads
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(-3,-2, 5), 
+            RayTracing::Vec3(0, 0,-4), 
+            RayTracing::Vec3(0, 4, 0), left_red));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(-2,-2, 0), 
+            RayTracing::Vec3(4, 0, 0), 
+            RayTracing::Vec3(0, 4, 0), back_green));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3( 3,-2, 1), 
+            RayTracing::Vec3(0, 0, 4), 
+            RayTracing::Vec3(0, 4, 0), right_blue));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(-2, 3, 1), 
+            RayTracing::Vec3(4, 0, 0), 
+            RayTracing::Vec3(0, 0, 4), upper_orange));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(-2,-3, 5), 
+            RayTracing::Vec3(4, 0, 0), 
+            RayTracing::Vec3(0, 0,-4), lower_teal));
+
+
+    double aspect_ratio = 1.0;
+    double vfov = 80.0;
+    double defocus_angle = 0.0;
+    double focus_dist = 10.0;
+    uint32_t image_width = 400;
+    uint32_t samples_per_pixel = 100;
+    uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(0, 0, 9);
     RayTracing::Point3 look_at(0, 0, 0);
     RayTracing::Vec3 vup(0, 1, 0);
 
