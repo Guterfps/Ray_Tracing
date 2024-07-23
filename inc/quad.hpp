@@ -3,6 +3,7 @@
 #define QUAD_HPP
 
 #include "hittable.hpp"
+#include "hittable_list.hpp"
 
 namespace RayTracing {
 
@@ -112,6 +113,44 @@ inline Vec3 Quad::CalcW(const Vec3& u, const Vec3& v) {
     Vec3 n = Cross(u, v);
 
     return (n / Dot(n ,n)); 
+}
+
+// Returns the 3D box(six sides) that contains the two opposite vertices a & b.
+inline std::shared_ptr<HittableList> 
+Box(const Point3& a, const Point3& b, std::shared_ptr<Material> mat) {
+    auto sides = std::make_shared<HittableList>();
+
+    Point3 min(std::fmin(a.GetX(), b.GetX()),
+            std::fmin(a.GetY(), b.GetY()),
+            std::fmin(a.GetZ(), b.GetZ()));
+    Point3 max(std::fmax(a.GetX(), b.GetX()),
+            std::fmax(a.GetY(), b.GetY()),
+            std::fmax(a.GetZ(), b.GetZ()));
+
+    Vec3 dx(max.GetX() - min.GetX(), 0.0, 0.0);
+    Vec3 dy(0.0, max.GetY() - min.GetY(), 0.0);
+    Vec3 dz(0.0, 0.0, max.GetZ() - min.GetZ());
+
+    sides->Add(std::make_shared<Quad>(
+                Point3(min.GetX(), min.GetY(), max.GetZ()),
+                dx, dy, mat)); // front
+    sides->Add(std::make_shared<Quad>(
+                Point3(max.GetX(), min.GetY(), max.GetZ()),
+                -dz, dy, mat)); // right
+    sides->Add(std::make_shared<Quad>(
+                Point3(max.GetX(), min.GetY(), min.GetZ()),
+                -dx, dy, mat)); // back
+    sides->Add(std::make_shared<Quad>(
+                Point3(min.GetX(), min.GetY(), min.GetZ()),
+                dz, dy, mat)); // left
+    sides->Add(std::make_shared<Quad>(
+                Point3(min.GetX(), max.GetY(), max.GetZ()),
+                dx, -dz, mat)); // top
+    sides->Add(std::make_shared<Quad>(
+                Point3(min.GetX(), min.GetY(), min.GetZ()),
+                dx, dz, mat)); // bottom
+
+    return sides;
 }
 
 }

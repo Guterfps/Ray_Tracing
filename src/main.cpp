@@ -435,6 +435,14 @@ void CornellBox() {
             RayTracing::Vec3(0, 555, 0),
             white));
 
+    world.Add(RayTracing::Box(
+                RayTracing::Point3(130, 0, 65),
+                RayTracing::Point3(295, 165, 230),
+                white));
+    world.Add(RayTracing::Box(
+                RayTracing::Point3(265, 0, 295),
+                RayTracing::Point3(430, 330, 460),
+                white));
 
     double aspect_ratio = 1.0;
     double vfov = 40.0;
