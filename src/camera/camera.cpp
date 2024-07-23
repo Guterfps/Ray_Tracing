@@ -114,27 +114,22 @@ Color Camera::RayColor(const Ray& ray,
     HitRecord rec;
 
     // Interval min = 0.001 - Fixing shadow acne
-    if (world.Hit(ray, Interval(0.001, RayTracing::INF), rec)) {
-        Ray scattered;
-        Color attenuation;
-        
-        if (rec.mat->Scatter(ray, rec, attenuation, scattered)) {
-            return Color(static_cast<Vec3>(attenuation) * 
-                    static_cast<Vec3>(RayColor(scattered, depth - 1, world)));
-        }
-
-        return Color(0.0, 0.0, 0.0);
+    if (!world.Hit(ray, Interval(0.001, RayTracing::INF), rec)) {
+        return m_background;
     }
     
-    // linear interpolation
+    Ray scattered;
+    Color attenuation;
+    Color color_from_emission = rec.mat->Emitted(rec.u, rec.v, rec.point);
     
-    Vec3 unit_direction = UnitVector(ray.GetDirection());
-    double a = 0.5 * (unit_direction.GetY() + 1.0);
-    Vec3 v = (1.0 - a) * 
-            static_cast<Vec3>(Color(1.0, 1.0, 1.0)) + 
-            a * static_cast<Vec3>(Color(0.5, 0.7, 1.0)); 
+    if (!rec.mat->Scatter(ray, rec, attenuation, scattered)) {
+        return color_from_emission;
+    }
+
+    Color color_from_scatter(static_cast<Vec3>(attenuation) * 
+                static_cast<Vec3>(RayColor(scattered, depth - 1, world)));
     
-    return Color(v);
+    return (color_from_emission + color_from_scatter);
 }
 
 // Construct a camera ray originating from the defocus disk and directed at a randomly

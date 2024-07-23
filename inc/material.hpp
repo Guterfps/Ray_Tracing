@@ -17,6 +17,7 @@ public:
                         const HitRecord& rec,
                         Color& attenuation,
                         Ray& scatterd) const;
+    virtual Color Emitted(double u, double v, const Point3& p) const;
 
 };
 
@@ -31,6 +32,14 @@ inline bool Material::Scatter(const Ray& ray_in,
     (void)attenuation;
     (void)scatterd;
     return false;
+}
+
+inline Color Material::Emitted(double u, double v, const Point3& p) const {
+    (void)u; 
+    (void)v;
+    (void)p;
+
+    return Color(0.0, 0.0, 0.0);
 }
 
 }

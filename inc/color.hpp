@@ -56,6 +56,12 @@ inline Color& Color::operator+=(const Color& other) {
     return *this;
 }
 
+inline Color operator+(const Color& u, const Color& v) {
+    Color tmp(u);
+
+    return (tmp += v);
+}
+
 // non member functions
 
 inline double LinearToGamma(double linear_component) {

@@ -11,7 +11,8 @@ public:
     Quad(const Point3& Q,
         const Vec3& u, const Vec3& v, 
         std::shared_ptr<Material> mat);
-
+    virtual ~Quad() = default;
+    
     virtual void SetBoundingBox();
 
     AABB BoundingBox() const override;

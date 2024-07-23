@@ -21,6 +21,8 @@ public:
         Point3 look_at = {0.0, 0.0, -1.0},
         Vec3 vup = {0.0, 1.0, 0.0});
 
+    void SetBackground(const Color& color);
+
     void Render(const Hittable& world);
     void Render(const Hittable& world, bool parallel);
 
@@ -44,6 +46,7 @@ private:
     uint32_t m_image_height;            // Rendered image height
     uint32_t m_samples_per_pixel;       // Count of random samples for each pixel
     uint32_t m_max_depth;               // Maximum number of ray bounces into scene
+    Color m_background;                 // Scene background color
 
     void Initialize();
     Color RayColor(const Ray& ray, uint32_t depth, const Hittable& world) const;
@@ -71,7 +74,13 @@ m_defocus_angle(defocus_angle),
 m_focus_dist(focus_dist),
 m_image_width(image_width),
 m_samples_per_pixel(samples_per_pixel),
-m_max_depth(max_depth) {}
+m_max_depth(max_depth),
+m_background(Color(0.0, 0.0, 0.0))
+ {}
+
+inline void Camera::SetBackground(const Color& color) {
+    m_background = color;
+}
 
 }
 
