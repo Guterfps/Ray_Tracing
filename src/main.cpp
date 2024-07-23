@@ -6,6 +6,8 @@
 #include "hittable_list.hpp"
 #include "sphere.hpp"
 #include "quad.hpp"
+#include "disk.hpp"
+#include "triangle.hpp"
 #include "camera.hpp"
 #include "lambertian.hpp"
 #include "metal.hpp"
@@ -278,15 +280,15 @@ void Quads() {
                     RayTracing::Color(0.2, 0.8, 0.8));
 
     // Quads
-    world.Add(std::make_shared<RayTracing::Quad>(
-            RayTracing::Point3(-3,-2, 5), 
+    world.Add(std::make_shared<RayTracing::Disk>(
+            RayTracing::Point3(-3,-0.5, 2.5), 
             RayTracing::Vec3(0, 0,-4), 
-            RayTracing::Vec3(0, 4, 0), left_red));
+            RayTracing::Vec3(0, 4, 0), left_red, 0.7));
     world.Add(std::make_shared<RayTracing::Quad>(
             RayTracing::Point3(-2,-2, 0), 
             RayTracing::Vec3(4, 0, 0), 
             RayTracing::Vec3(0, 4, 0), back_green));
-    world.Add(std::make_shared<RayTracing::Quad>(
+    world.Add(std::make_shared<RayTracing::Triangle>(
             RayTracing::Point3( 3,-2, 1), 
             RayTracing::Vec3(0, 0, 4), 
             RayTracing::Vec3(0, 4, 0), right_blue));
