@@ -121,6 +121,16 @@ inline Interval AABB::PadToMinimum(const Interval& inter) {
     return ((inter.Size() < delta) ? inter.Expand(delta) : inter);
 }
 
+inline AABB operator+(const AABB& bbox, const Vec3& offset) {
+    return AABB(bbox.AxisInterval(AABB::Axis::X) + offset.GetX(),
+                bbox.AxisInterval(AABB::Axis::Y) + offset.GetY(),
+                bbox.AxisInterval(AABB::Axis::Z) + offset.GetZ());
+}
+
+inline AABB operator+(const Vec3& offset, const AABB& bbox) {
+    return (bbox + offset);
+}
+
 }
 
 #endif // AABB_HPP

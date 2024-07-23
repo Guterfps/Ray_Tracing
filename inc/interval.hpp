@@ -79,6 +79,14 @@ inline Interval Interval::Expand(double delta) const {
     return Interval(m_min - padding, m_max + padding);
 }
 
+inline Interval operator+(const Interval& ival, double displacement) {
+    return Interval(ival.GetMin() + displacement, ival.GetMax() + displacement);
+}
+
+inline Interval operator+(double displacement, const Interval& ival) {
+    return (ival + displacement);
+}
+
 }
 
 
