@@ -29,6 +29,9 @@ void Quads();
 void SimpleLight();
 void CornellBox();
 void CornellSmoke();
+void FinalScene(uint32_t image_width, 
+                uint32_t samples_per_pixel, 
+                uint32_t max_depth);
 
 int main(int argc, char** argv) {
     if (argc > 1) {    
@@ -57,12 +60,16 @@ int main(int argc, char** argv) {
             case 8:
                 CornellSmoke();
                 break;
+            case 9:
+                FinalScene(800, 10000, 40);
+                break;
             default:
-            std::clog << "invalid argument(1, 2)\n";
+            std::clog << "Invalid argument (valid arguments: 1 - 9)\n";
         }
     }
     else {
-        BouncingSpheres();
+        std::clog << "defualt scene\n";
+        FinalScene(400, 250, 4);
     }
 
     return 0;
@@ -558,6 +565,118 @@ void CornellSmoke() {
     uint32_t samples_per_pixel = 200;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(278, 278, -800);
+    RayTracing::Point3 look_at(278, 278, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
+    RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
+                        image_width, samples_per_pixel, max_depth,
+                        look_from, look_at, vup);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
+}
+
+void FinalScene(uint32_t image_width, 
+                uint32_t samples_per_pixel, 
+                uint32_t max_depth) {
+    RayTracing::HittableList boxes1;
+    auto ground = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.48, 0.83, 0.53));
+
+    uint32_t boxes_per_side = 20;
+    for (uint32_t i = 0; i < boxes_per_side; ++i) {
+        for (uint32_t j = 0; j < boxes_per_side; ++j) {
+            double w = 100.0;
+            double x0 = -1000.0 + i * w;
+            double y0 = 0.0;
+            double z0 = -1000.0 + j * w;
+            double x1 = x0 + w;
+            double y1 = RayTracing::RandomDouble(1.0, 101.0);
+            double z1 = z0 + w;
+
+            boxes1.Add(RayTracing::Box(
+                        RayTracing::Point3(x0, y0, z0),
+                        RayTracing::Point3(x1, y1, z1),
+                        ground));
+        }
+    }
+
+    RayTracing::HittableList world;
+    world.Add(std::make_shared<RayTracing::BVHNode>(boxes1));
+
+    auto light = std::make_shared<RayTracing::DiffuseLight>(
+                RayTracing::Color(7, 7, 7));
+    world.Add(std::make_shared<RayTracing::Quad>(
+                RayTracing::Point3(123, 554, 147),
+                RayTracing::Vec3(300, 0, 0),
+                RayTracing::Vec3(0, 0, 265),
+                light));
+
+    RayTracing::Point3 center1(400, 400, 200);
+    RayTracing::Point3 center2(center1 + RayTracing::Vec3(30, 0, 0));
+    auto sphere_material = std::make_shared<RayTracing::Lambertian>(
+                            RayTracing::Color(0.7, 0.3, 0.1));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+                center1, center2, 50.0, sphere_material));
+
+    world.Add(std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(260, 150, 45), 50, 
+                std::make_shared<RayTracing::Dielectric>(1.5)));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(0, 150, 145), 50,
+                std::make_shared<RayTracing::Metal>(
+                    RayTracing::Color(0.8, 0.8, 0.9), 1.0)));
+
+    auto boundary = std::make_shared<RayTracing::Sphere>(
+                    RayTracing::Point3(360, 150, 145), 70,
+                    std::make_shared<RayTracing::Dielectric>(1.5));
+    world.Add(boundary);
+    world.Add(std::make_shared<RayTracing::ConstantMedium>(
+                boundary, 0.2,
+                RayTracing::Color(0.2, 0.4, 0.9)));
+    boundary = std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(0, 0, 0), 5000,
+                std::make_shared<RayTracing::Dielectric>(1.5));
+    world.Add(std::make_shared<RayTracing::ConstantMedium>(
+                boundary, 0.0001,
+                RayTracing::Color(1, 1, 1)));
+
+    auto emat = std::make_shared<RayTracing::Lambertian>(
+                std::make_shared<RayTracing::ImageTexture>("earthmap.jpg"));
+    world.Add(std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(400, 200, 400), 100, emat));
+
+    auto pertext = std::make_shared<RayTracing::NoiseTexture>(0.2);
+    world.Add(std::make_shared<RayTracing::Sphere>(
+                RayTracing::Point3(220, 280, 300), 80,
+                std::make_shared<RayTracing::Lambertian>(pertext)));
+
+    RayTracing::HittableList boxes2;
+    
+    auto white = std::make_shared<RayTracing::Lambertian>(
+                    RayTracing::Color(0.73, 0.73, 0.73));
+    uint32_t ns = 1000;
+
+    for (uint32_t i = 0; i < ns; ++i) {
+        boxes2.Add(std::make_shared<RayTracing::Sphere>(
+                    RayTracing::Point3::Random(0, 165), 10, white));
+    }
+
+    world.Add(std::make_shared<RayTracing::Translate>(
+                std::make_shared<RayTracing::RotateY>(
+                    std::make_shared<RayTracing::BVHNode>(boxes2), 15.0),
+                    RayTracing::Vec3(-100, 270, 395)));
+
+    double aspect_ratio = 1.0;
+    double vfov = 40.0;
+    double defocus_angle = 0.0;
+    double focus_dist = 10.0;
+    RayTracing::Point3 look_from(478, 278, -600);
     RayTracing::Point3 look_at(278, 278, 0);
     RayTracing::Vec3 vup(0, 1, 0);
 
