@@ -17,6 +17,8 @@
 #include "image_texture.hpp"
 #include "noise_texture.hpp"
 #include "diffuse_light.hpp"
+#include "rotate_y.hpp"
+#include "translate.hpp"
 
 void BouncingSpheres();
 void CheckeredSpheres();
@@ -435,14 +437,24 @@ void CornellBox() {
             RayTracing::Vec3(0, 555, 0),
             white));
 
-    world.Add(RayTracing::Box(
-                RayTracing::Point3(130, 0, 65),
-                RayTracing::Point3(295, 165, 230),
-                white));
-    world.Add(RayTracing::Box(
-                RayTracing::Point3(265, 0, 295),
-                RayTracing::Point3(430, 330, 460),
-                white));
+    std::shared_ptr<RayTracing::Hittable> box1 = RayTracing::Box(
+                RayTracing::Point3(0, 0, 0),
+                RayTracing::Point3(165, 330, 165),
+                white);
+    box1 = std::make_shared<RayTracing::RotateY>(box1, 15);
+    box1 = std::make_shared<RayTracing::Translate>(box1, 
+                            RayTracing::Vec3(265, 0, 295));
+
+    std::shared_ptr<RayTracing::Hittable> box2 = RayTracing::Box(
+                RayTracing::Point3(0, 0, 0),
+                RayTracing::Point3(165, 165, 165),
+                white);
+    box2 = std::make_shared<RayTracing::RotateY>(box2, -18);
+    box2 = std::make_shared<RayTracing::Translate>(box2, 
+                            RayTracing::Vec3(130, 0, 65));
+
+    world.Add(box1);
+    world.Add(box2);
 
     double aspect_ratio = 1.0;
     double vfov = 40.0;
