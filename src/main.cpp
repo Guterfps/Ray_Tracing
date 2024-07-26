@@ -19,6 +19,7 @@
 #include "diffuse_light.hpp"
 #include "rotate_y.hpp"
 #include "translate.hpp"
+#include "constant_medium.hpp"
 
 void BouncingSpheres();
 void CheckeredSpheres();
@@ -27,6 +28,7 @@ void PerlinSpheres();
 void Quads();
 void SimpleLight();
 void CornellBox();
+void CornellSmoke();
 
 int main(int argc, char** argv) {
     if (argc > 1) {    
@@ -51,6 +53,9 @@ int main(int argc, char** argv) {
                 break;
             case 7:
                 CornellBox();
+                break;
+            case 8:
+                CornellSmoke();
                 break;
             default:
             std::clog << "invalid argument(1, 2)\n";
@@ -471,6 +476,94 @@ void CornellBox() {
                         image_width, samples_per_pixel, max_depth,
                         look_from, look_at, vup);
 
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+    cam.Render(world, true);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double, std::milli> ms = t2 - t1;
+
+    std::clog << "parallel execution time: " << ms.count() << '\n';
+}
+
+void CornellSmoke() {
+    RayTracing::HittableList world;
+
+    auto red = std::make_shared<RayTracing::Lambertian>(
+                RayTracing::Color(0.65, 0.05, 0.05));
+    auto white = std::make_shared<RayTracing::Lambertian>(
+                RayTracing::Color(0.73, 0.73, 0.73));
+    auto green = std::make_shared<RayTracing::Lambertian>(
+                RayTracing::Color(0.12, 0.45, 0.15));
+    auto light = std::make_shared<RayTracing::DiffuseLight>(
+                RayTracing::Color(7, 7, 7));
+
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(555, 0, 0),
+            RayTracing::Vec3(0, 555, 0),
+            RayTracing::Vec3(0, 0, 555),
+            green));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(0, 0, 0),
+            RayTracing::Vec3(0, 555, 0),
+            RayTracing::Vec3(0, 0, 555),
+            red));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(113, 554, 127),
+            RayTracing::Vec3(330, 0, 0),
+            RayTracing::Vec3(0, 0, 305),
+            light));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(0, 0, 0),
+            RayTracing::Vec3(555, 0, 0),
+            RayTracing::Vec3(0, 0, 555),
+            white));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(555, 555, 555),
+            RayTracing::Vec3(-555, 0, 0),
+            RayTracing::Vec3(0, 0, -555),
+            white));
+    world.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(0, 0, 555),
+            RayTracing::Vec3(555, 0, 0),
+            RayTracing::Vec3(0, 555, 0),
+            white));
+    
+    std::shared_ptr<RayTracing::Hittable> box1 = RayTracing::Box(
+                RayTracing::Point3(0, 0, 0),
+                RayTracing::Point3(165, 330, 165),
+                white);
+    box1 = std::make_shared<RayTracing::RotateY>(box1, 15);
+    box1 = std::make_shared<RayTracing::Translate>(box1, 
+                            RayTracing::Vec3(265, 0, 295));
+
+    std::shared_ptr<RayTracing::Hittable> box2 = RayTracing::Box(
+                RayTracing::Point3(0, 0, 0),
+                RayTracing::Point3(165, 165, 165),
+                white);
+    box2 = std::make_shared<RayTracing::RotateY>(box2, -18);
+    box2 = std::make_shared<RayTracing::Translate>(box2, 
+                            RayTracing::Vec3(130, 0, 65));
+
+    world.Add(std::make_shared<RayTracing::ConstantMedium>(
+                box1, 0.01, RayTracing::Color(0, 0, 0)));
+    world.Add(std::make_shared<RayTracing::ConstantMedium>(
+                box2, 0.01, RayTracing::Color(1, 1, 1)));
+
+    double aspect_ratio = 1.0;
+    double vfov = 40.0;
+    double defocus_angle = 0.0;
+    double focus_dist = 10.0;
+    uint32_t image_width = 600;
+    uint32_t samples_per_pixel = 200;
+    uint32_t max_depth = 50;
+    RayTracing::Point3 look_from(278, 278, -800);
+    RayTracing::Point3 look_at(278, 278, 0);
+    RayTracing::Vec3 vup(0, 1, 0);
+
+    RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
+                        image_width, samples_per_pixel, max_depth,
+                        look_from, look_at, vup);
 
     auto t1 = std::chrono::high_resolution_clock::now();
     cam.Render(world, true);

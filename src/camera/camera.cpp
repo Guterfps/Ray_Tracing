@@ -44,7 +44,7 @@ void Camera::Render(const Hittable& world, bool parallel) {
         (m_image_height - j) << ' ' << std::flush;
         
         for (size_t i = 0; i < m_image_width; ++i) {
-            futers[j * m_image_width + i] = std::async(std::launch::async,
+            futers[j * m_image_width + i] = std::async(
                 [this, &world](size_t j, size_t i) {
                 Color pixel_color(0.0, 0.0, 0.0);
 
