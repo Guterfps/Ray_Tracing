@@ -473,7 +473,7 @@ void CornellBox() {
     double defocus_angle = 0.0;
     double focus_dist = 10.0;
     uint32_t image_width = 600;
-    uint32_t samples_per_pixel = 200;
+    uint32_t samples_per_pixel = 64;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(278, 278, -800);
     RayTracing::Point3 look_at(278, 278, 0);

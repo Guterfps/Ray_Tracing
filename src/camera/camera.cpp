@@ -19,9 +19,11 @@ void Camera::Render(const Hittable& world) {
         for (size_t i = 0; i < m_image_width; ++i) {
             Color pixel_color(0.0, 0.0, 0.0);
 
-            for (size_t sample = 0; sample < m_samples_per_pixel; ++sample) {
-                Ray ray = GetRay(i, j);
-                pixel_color += RayColor(ray, m_max_depth, world);
+            for (int s_j = 0; s_j < m_sqrt_spp; ++s_j) {
+                for (int s_i = 0; s_i < m_sqrt_spp; ++s_i) {
+                    Ray r = GetRay(i, j, s_i, s_j);
+                    pixel_color += RayColor(r, m_max_depth, world);
+                }
             }
 
             WriteColor(std::cout, 
@@ -48,9 +50,11 @@ void Camera::Render(const Hittable& world, bool parallel) {
                 [this, &world](size_t j, size_t i) {
                 Color pixel_color(0.0, 0.0, 0.0);
 
-                for (size_t sample = 0; sample < m_samples_per_pixel; ++sample) {
-                    Ray ray = GetRay(i, j);
-                    pixel_color += RayColor(ray, m_max_depth, world);
+                for (int s_j = 0; s_j < m_sqrt_spp; ++s_j) {
+                    for (int s_i = 0; s_i < m_sqrt_spp; ++s_i) {
+                        Ray r = GetRay(i, j, s_i, s_j);
+                        pixel_color += RayColor(r, m_max_depth, world);
+                    }
                 }
 
                 return pixel_color;
@@ -72,7 +76,9 @@ void Camera::Initialize() {
     m_image_height = static_cast<uint32_t>(m_image_width / m_aspect_ratio);
     m_image_height = (m_image_height < 1) ? 1 : m_image_height;
 
-    m_pixel_samples_scale = 1.0 / m_samples_per_pixel;
+    m_sqrt_spp = static_cast<uint32_t>(std::sqrt(m_samples_per_pixel));
+    m_pixel_samples_scale = 1.0 / (m_sqrt_spp * m_sqrt_spp);
+    m_recip_sqrt_spp = 1.0 / m_sqrt_spp;
     
     m_center = m_look_from;
     
@@ -133,9 +139,9 @@ Color Camera::RayColor(const Ray& ray,
 }
 
 // Construct a camera ray originating from the defocus disk and directed at a randomly
-// sampled point around the pixel location i, j.
-inline Ray Camera::GetRay(size_t i, size_t j) const {
-    Vec3 offset = SampleSqure();
+// sampled point around the pixel location i, j for stratified sample squre s_i, s_j.
+inline Ray Camera::GetRay(int i, int j, int s_i, int s_j) const {
+    Vec3 offset = SampleSquareStratified(s_i, s_j);
     Point3 pixel_sample = m_pixel00_loc 
                         + ((i + offset.GetX()) * m_pixel_delta_u)
                         + ((j + offset.GetY()) * m_pixel_delta_v);
@@ -158,6 +164,15 @@ inline Point3 Camera::DefocusDiskSample() const {
 
 inline Vec3 Camera::SampleSqure() {
     return (Vec3(RandomDouble() - 0.5, RandomDouble() - 0.5, 0.0));
+}
+
+// Returns the vector to a random point in the square sub-pixel specified by grid
+// indices s_i and s_j, for an idealized unit square pixel [-.5,-.5] to [+.5,+.5].
+inline Vec3 Camera::SampleSquareStratified(int s_i, int s_j) const {
+    double px = ((s_i + RandomDouble()) * m_recip_sqrt_spp) - 0.5;
+    double py = ((s_j + RandomDouble()) * m_recip_sqrt_spp) - 0.5;
+
+    return Vec3(px, py, 0.0);
 }
 
 }

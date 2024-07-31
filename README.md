@@ -137,6 +137,8 @@ Code example for a Cornell Box:
                                 look_from, look_at, vup);
 
         cam.Render(world, true);
+
+        return 0;
     }
 ```
 
@@ -145,7 +147,7 @@ You can run the examples from the src/main.cpp file like this:
     zig build run -- <example number(1 - 9)> > output.ppm
 ```
 
-Image shoecasing some of the fetures:
+Image showcasing some of the fetures:
 ![alt text](/out/image.ppm)
 
 

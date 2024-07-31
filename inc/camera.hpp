@@ -39,6 +39,8 @@ private:
     Vec3 m_vup;                         // camera relative "up" direction
     double m_aspect_ratio;              // Ratio of image width over height
     double m_pixel_samples_scale;       // Color scale factor for a sum of pixel samples
+    uint32_t m_sqrt_spp;                // Squre root of number of samples per pixel
+    double m_recip_sqrt_spp;            // 1 / m_sqrt_spp
     double m_vfov;                      // vertical view angle
     double m_defocus_angle;             // Variation angle of rays through each pixel
     double m_focus_dist;                // Distance from camera lookfrom point to plane of perfect focus
@@ -50,9 +52,11 @@ private:
 
     void Initialize();
     Color RayColor(const Ray& ray, uint32_t depth, const Hittable& world) const;
-    Ray GetRay(size_t i, size_t j) const;
+    Ray GetRay(int i, int j, int s_i, int s_j) const;
     Point3 DefocusDiskSample() const;
     static Vec3 SampleSqure();
+    Vec3 SampleSquareStratified(int s_i, int s_j) const;
+
 };
 
 inline Camera::Camera(double aspect_ratio,
