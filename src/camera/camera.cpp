@@ -4,10 +4,13 @@
 
 #include "camera.hpp"
 #include "utils.hpp"
+#include "hittable_pdf.hpp"
+#include "cosine_pdf.hpp"
+#include "mixture_pdf.hpp"
 
 namespace RayTracing {
 
-void Camera::Render(const Hittable& world) {
+void Camera::Render(const Hittable& world, const Hittable& lights) {
     Initialize();
 
     std::cout << "P3\n" << m_image_width << ' ' << m_image_height << "\n255\n";
@@ -22,7 +25,7 @@ void Camera::Render(const Hittable& world) {
             for (int s_j = 0; s_j < m_sqrt_spp; ++s_j) {
                 for (int s_i = 0; s_i < m_sqrt_spp; ++s_i) {
                     Ray r = GetRay(i, j, s_i, s_j);
-                    pixel_color += RayColor(r, m_max_depth, world);
+                    pixel_color += RayColor(r, m_max_depth, world, lights);
                 }
             }
 
@@ -33,6 +36,45 @@ void Camera::Render(const Hittable& world) {
 
     std::clog << "\rDone.                 \n";
 }
+
+void Camera::Render(const Hittable& world, const Hittable& lights, bool parallel) {
+    Initialize();
+
+    std::vector<std::future<Color>> futers(m_image_height * m_image_width);
+
+    std::cout << "P3\n" << m_image_width << ' ' << m_image_height << "\n255\n";
+
+    for (size_t j = 0; j < m_image_height; ++j) {
+        std::clog << "\rScanlines remaining: " << 
+        (m_image_height - j) << ' ' << std::flush;
+        
+        for (size_t i = 0; i < m_image_width; ++i) {
+            futers[j * m_image_width + i] = std::async(
+                [this, &world, &lights](size_t j, size_t i) {
+                Color pixel_color(0.0, 0.0, 0.0);
+
+                for (int s_j = 0; s_j < m_sqrt_spp; ++s_j) {
+                    for (int s_i = 0; s_i < m_sqrt_spp; ++s_i) {
+                        Ray r = GetRay(i, j, s_i, s_j);
+                        pixel_color += RayColor(r, m_max_depth, world, lights);
+                    }
+                }
+
+                return pixel_color;
+            }, j, i);
+        }
+    }
+    
+    for (auto& f : futers) {
+        Color pixel = f.get();
+
+        WriteColor(std::cout, 
+                Color(m_pixel_samples_scale * static_cast<Vec3>(pixel)));
+    }
+
+    std::clog << "\rDone.                 \n";
+}
+
 
 void Camera::Render(const Hittable& world, bool parallel) {
     Initialize();
@@ -112,6 +154,47 @@ void Camera::Initialize() {
 
 Color Camera::RayColor(const Ray& ray, 
                     uint32_t depth, 
+                    const Hittable& world, 
+                    const Hittable& lights) const {
+    if (depth == 0) {
+        return Color(0.0, 0.0, 0.0);
+    }
+    
+    HitRecord rec;
+
+    // Interval min = 0.001 - Fixing shadow acne
+    if (!world.Hit(ray, Interval(0.001, RayTracing::INF), rec)) {
+        return m_background;
+    }
+    
+    Ray scattered;
+    Color attenuation;
+    double pdf_value;
+    Color color_from_emission = 
+            rec.mat->Emitted(ray, rec, rec.u, rec.v, rec.point);
+    
+    if (!rec.mat->Scatter(ray, rec, attenuation, scattered, pdf_value)) {
+        return color_from_emission;
+    }
+
+    auto p0 = std::make_shared<HittablePDF>(lights, rec.point);
+    auto p1 = std::make_shared<CosinePDF>(rec.normal);
+    MixturePDF mixed_pdf(p0, p1);
+
+    scattered = Ray(rec.point, mixed_pdf.Generate(), ray.GetTime());
+    pdf_value = mixed_pdf.Value(scattered.GetDirection());
+
+    double scattering_pdf = rec.mat->ScatteringPDF(ray, rec, scattered);
+
+    Color sample_color(RayColor(scattered, depth - 1, world, lights));
+    Color color_from_scatter((static_cast<Vec3>(attenuation) * scattering_pdf *
+                            static_cast<Vec3>(sample_color)) / pdf_value);
+    
+    return (color_from_emission + color_from_scatter);
+}
+
+Color Camera::RayColor(const Ray& ray, 
+                    uint32_t depth, 
                     const Hittable& world) const {
     if (depth == 0) {
         return Color(0.0, 0.0, 0.0);
@@ -126,14 +209,23 @@ Color Camera::RayColor(const Ray& ray,
     
     Ray scattered;
     Color attenuation;
-    Color color_from_emission = rec.mat->Emitted(rec.u, rec.v, rec.point);
+    double pdf_value;
+    Color color_from_emission = 
+            rec.mat->Emitted(ray, rec, rec.u, rec.v, rec.point);
     
-    if (!rec.mat->Scatter(ray, rec, attenuation, scattered)) {
+    if (!rec.mat->Scatter(ray, rec, attenuation, scattered, pdf_value)) {
         return color_from_emission;
     }
 
-    Color color_from_scatter(static_cast<Vec3>(attenuation) * 
-                static_cast<Vec3>(RayColor(scattered, depth - 1, world)));
+    CosinePDF cosine_pdf(rec.normal);
+    scattered = Ray(rec.point, cosine_pdf.Generate(), ray.GetTime());
+    pdf_value = cosine_pdf.Value(scattered.GetDirection());
+
+    double scattering_pdf = rec.mat->ScatteringPDF(ray, rec, scattered);
+
+    Color sample_color(RayColor(scattered, depth - 1, world));
+    Color color_from_scatter((static_cast<Vec3>(attenuation) * scattering_pdf *
+                            static_cast<Vec3>(sample_color)) / pdf_value);
     
     return (color_from_emission + color_from_scatter);
 }

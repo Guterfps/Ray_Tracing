@@ -468,12 +468,19 @@ void CornellBox() {
     world.Add(box1);
     world.Add(box2);
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(343, 554, 332), 
+                            RayTracing::Vec3(-130, 0, 0),
+                            RayTracing::Vec3(0, 0, -105),
+                            empty_material);
+
     double aspect_ratio = 1.0;
     double vfov = 40.0;
     double defocus_angle = 0.0;
     double focus_dist = 10.0;
     uint32_t image_width = 600;
-    uint32_t samples_per_pixel = 64;
+    uint32_t samples_per_pixel = 10;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(278, 278, -800);
     RayTracing::Point3 look_at(278, 278, 0);
@@ -485,7 +492,7 @@ void CornellBox() {
 
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;

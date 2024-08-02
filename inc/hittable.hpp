@@ -26,6 +26,11 @@ struct HitRecord {
     void SetFaceNormal(const Ray& ray, const Vec3& outward_normal);
 };
 
+inline void HitRecord::SetFaceNormal(const Ray& ray, const Vec3& outward_normal) {
+    front_face = (Dot(ray.GetDirection(), outward_normal) < 0.0);
+    normal = front_face ? outward_normal : (-1.0 * outward_normal);
+}
+
 class Hittable {
 public:
     virtual ~Hittable() = default;
@@ -34,11 +39,23 @@ public:
                     const Interval& ray_t, 
                     HitRecord& rec) const =0;
     virtual AABB BoundingBox() const =0;
+    virtual double PDFValue(const Point3& origin, const Vec3& direction) const;
+    virtual Vec3 Random(const Point3& origin) const;
 };
 
-inline void HitRecord::SetFaceNormal(const Ray& ray, const Vec3& outward_normal) {
-    front_face = (Dot(ray.GetDirection(), outward_normal) < 0.0);
-    normal = front_face ? outward_normal : (-1.0 * outward_normal);
+
+inline double Hittable::PDFValue(const Point3& origin, 
+                                const Vec3& direction) const {
+    (void)origin;
+    (void)direction;
+    
+    return 0.0;
+}
+
+inline Vec3 Hittable::Random(const Point3& origin) const {
+    (void)origin;
+    
+    return Vec3(1.0, 0.0, 0.0);
 }
 
 }

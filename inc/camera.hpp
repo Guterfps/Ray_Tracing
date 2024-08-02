@@ -23,7 +23,8 @@ public:
 
     void SetBackground(const Color& color);
 
-    void Render(const Hittable& world);
+    void Render(const Hittable& world, const Hittable& lights);
+    void Render(const Hittable& world, const Hittable& lights, bool parallel);
     void Render(const Hittable& world, bool parallel);
 
 private:
@@ -51,7 +52,13 @@ private:
     Color m_background;                 // Scene background color
 
     void Initialize();
-    Color RayColor(const Ray& ray, uint32_t depth, const Hittable& world) const;
+    Color RayColor(const Ray& ray, 
+                    uint32_t depth, 
+                    const Hittable& world, 
+                    const Hittable& lights) const;
+    Color RayColor(const Ray& ray, 
+                    uint32_t depth, 
+                    const Hittable& world) const;
     Ray GetRay(int i, int j, int s_i, int s_j) const;
     Point3 DefocusDiskSample() const;
     static Vec3 SampleSqure();

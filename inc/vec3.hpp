@@ -221,6 +221,18 @@ inline Vec3 Refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
     return (ray_out_perp + ray_out_parallel);
 }
 
+inline Vec3 RandomCosineDirection() {
+    double r1 = RandomDouble();
+    double r2 = RandomDouble();
+
+    double phi = 2 * PI * r1;
+    double x = std::cos(phi) * std::sqrt(r2);
+    double y = std::sin(phi) * std::sqrt(r2);
+    double z = std::sqrt(1 - r2);
+
+    return Vec3(x, y, z);
+}
+
 } // RayTracing
 
 #endif // VEC3_HPP

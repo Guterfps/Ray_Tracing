@@ -20,7 +20,9 @@ public:
     bool Hit(const Ray& ray,
             const Interval& ray_t,
             HitRecord& rec) const override;
-    
+    double PDFValue(const Point3& origin, const Vec3& direction) const override;
+    Vec3 Random(const Point3& origin) const override;
+
     virtual bool IsInterior(double a, double b) const; 
 
 private:
@@ -31,11 +33,13 @@ private:
     Vec3 m_w;
     Vec3 m_normal;
     double m_D;
+    double m_area;
     std::shared_ptr<Material> m_mat;
 
     static Vec3 CalcPlaneNormal(const Vec3& u, const Vec3& v);
     static double CalcPlaneD(const Vec3& normal, const Point3& p);
     static Vec3 CalcW(const Vec3& u, const Vec3& v);
+    static double CalcArea(const Vec3& u, const Vec3& v);
 
 };
 
@@ -43,7 +47,9 @@ inline Quad::Quad(const Point3& Q,
         const Vec3& u, const Vec3& v, 
         std::shared_ptr<Material> mat) :
 m_Q(Q), m_u(u), m_v(v), m_w(CalcW(u, v)),
-m_normal(CalcPlaneNormal(m_u, m_v)), m_D(CalcPlaneD(m_normal, m_Q)), 
+m_normal(CalcPlaneNormal(m_u, m_v)), 
+m_D(CalcPlaneD(m_normal, m_Q)),
+m_area(CalcArea(m_u, m_v)), 
 m_mat(mat) 
 {
     SetBoundingBox();
@@ -94,6 +100,24 @@ inline bool Quad::Hit(const Ray& ray,
     return true;
 }
 
+inline double Quad::PDFValue(const Point3& origin, const Vec3& direction) const {
+    HitRecord rec;
+    if (!this->Hit(Ray(origin, direction), Interval(0.001, INF), rec)) {
+        return 0.0;
+    }
+
+    double distance_squared = rec.t * rec.t * direction.LengthSquared();
+    double cosine = std::fabs(Dot(direction, rec.normal) / direction.Length());
+
+    return (distance_squared / (cosine * m_area));
+}
+
+inline Vec3 Quad::Random(const Point3& origin) const {
+    Point3 p = m_Q + (RandomDouble() * m_u) + (RandomDouble() * m_v);
+
+    return (p - origin);
+}
+
 inline bool Quad::IsInterior(double a, double b) const {
     Interval unit_interval(0.0, 1.0);
 
@@ -113,6 +137,10 @@ inline Vec3 Quad::CalcW(const Vec3& u, const Vec3& v) {
     Vec3 n = Cross(u, v);
 
     return (n / Dot(n ,n)); 
+}
+
+inline double Quad::CalcArea(const Vec3& u, const Vec3& v) {
+    return (Cross(u, v).Length());
 }
 
 // Returns the 3D box(six sides) that contains the two opposite vertices a & b.

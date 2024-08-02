@@ -5,6 +5,7 @@
 #include "material.hpp"
 #include "texture.hpp"
 #include "solid_color.hpp"
+#include "onb.hpp"
 
 namespace RayTracing {
 
@@ -16,7 +17,11 @@ public:
     bool Scatter(const Ray& ray_in,
                 const HitRecord& rec,
                 Color& attenuation,
-                Ray& scatterd) const override;
+                Ray& scatterd,
+                double& pdf) const override;
+    double ScatteringPDF(const Ray& r_in,
+                        const HitRecord& rec,
+                        const Ray& scattered) const override;
 
 private:
     std::shared_ptr<Texture> m_tex;
@@ -33,21 +38,23 @@ m_tex(tex)
 inline bool Lambertian::Scatter(const Ray& ray_in,
                 const HitRecord& rec,
                 Color& attenuation,
-                Ray& scatterd) const {
-    Vec3 scatter_direction = rec.normal + RandomUnitVector();
+                Ray& scatterd,
+                double& pdf) const {
+    ONB uvw(rec.normal);
+    Vec3 scatter_direction = uvw.Transform(RandomCosineDirection());
     
-    if (scatter_direction.NearZero()) {
-        scatter_direction = rec.normal;
-    }
-    
-    scatterd = Ray(rec.point, scatter_direction, ray_in.GetTime());
+    scatterd = Ray(rec.point, UnitVector(scatter_direction), ray_in.GetTime());
     attenuation = m_tex->Value(rec.u, rec.v, rec.point);
-
-    (void)ray_in;
+    pdf = Dot(uvw.W(), scatterd.GetDirection()) / PI;
 
     return true;
 }
 
+inline double Lambertian::ScatteringPDF(const Ray& r_in,
+                                        const HitRecord& rec,
+                                        const Ray& scattered) const {
+    return (1 / (2 * PI));
+}
 
 }
 
