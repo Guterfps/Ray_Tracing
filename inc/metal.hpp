@@ -12,9 +12,7 @@ public:
 
     bool Scatter(const Ray& ray_in,
             const HitRecord& rec,
-            Color& attenuation,
-            Ray& scatterd,
-            double& pdf) const override;
+            ScatterRecord& srec) const override;
 
 private:
     Color m_albedo;
@@ -27,18 +25,17 @@ m_albedo(albedo), m_fuzz((fuzz < 1.0) ? fuzz : 1.0)
 
 inline bool Metal::Scatter(const Ray& ray_in,
             const HitRecord& rec,
-            Color& attenuation,
-            Ray& scatterd,
-            double& pdf) const {
+            ScatterRecord& srec) const {
     Vec3 reflected = Reflect(ray_in.GetDirection(), rec.normal);
     
     reflected = UnitVector(reflected) + (m_fuzz * RandomUnitVector());
-    scatterd = Ray(rec.point, reflected, ray_in.GetTime());
-    attenuation = m_albedo;
+    
+    srec.attenuation = m_albedo;
+    srec.pdf_ptr = nullptr;
+    srec.skip_pdf = true;
+    srec.skip_pdf_ray = Ray(rec.point, reflected, ray_in.GetTime());
 
-    (void)pdf;
-
-    return (Dot(scatterd.GetDirection(), rec.normal) > 0.0);
+    return true;
 }
 
 

@@ -12,9 +12,7 @@ public:
 
     bool Scatter(const Ray& ray_in,
                 const HitRecord& rec,
-                Color& attenuation,
-                Ray& scatterd,
-                double& pdf) const override;
+                ScatterRecord& srec) const override;
 
 private:
     // Refractive index in vacuum or air, or the ratio of the material's refractive index over
@@ -31,10 +29,10 @@ m_refraction_index(refraction_index)
 
 inline bool Dielectric::Scatter(const Ray& ray_in,
                 const HitRecord& rec,
-                Color& attenuation,
-                Ray& scatterd,
-                double& pdf) const {
-    attenuation = Color(1.0, 1.0, 1.0);
+                ScatterRecord& srec) const {
+    srec.attenuation = Color(1.0, 1.0, 1.0);
+    srec.pdf_ptr = nullptr;
+    srec.skip_pdf = true;
     double ri = rec.front_face ? 
                 (1.0 / m_refraction_index) : m_refraction_index;
     
@@ -51,9 +49,7 @@ inline bool Dielectric::Scatter(const Ray& ray_in,
         direction = Refract(unit_direction, rec.normal, ri);
     }
 
-    scatterd = Ray(rec.point, direction, ray_in.GetTime());
-
-    (void)pdf;
+    srec.skip_pdf_ray = Ray(rec.point, direction, ray_in.GetTime());
 
     return true;
 }

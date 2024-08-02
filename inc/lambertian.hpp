@@ -5,7 +5,7 @@
 #include "material.hpp"
 #include "texture.hpp"
 #include "solid_color.hpp"
-#include "onb.hpp"
+#include "cosine_pdf.hpp"
 
 namespace RayTracing {
 
@@ -16,9 +16,7 @@ public:
 
     bool Scatter(const Ray& ray_in,
                 const HitRecord& rec,
-                Color& attenuation,
-                Ray& scatterd,
-                double& pdf) const override;
+                ScatterRecord& srec) const override;
     double ScatteringPDF(const Ray& r_in,
                         const HitRecord& rec,
                         const Ray& scattered) const override;
@@ -37,15 +35,10 @@ m_tex(tex)
 
 inline bool Lambertian::Scatter(const Ray& ray_in,
                 const HitRecord& rec,
-                Color& attenuation,
-                Ray& scatterd,
-                double& pdf) const {
-    ONB uvw(rec.normal);
-    Vec3 scatter_direction = uvw.Transform(RandomCosineDirection());
-    
-    scatterd = Ray(rec.point, UnitVector(scatter_direction), ray_in.GetTime());
-    attenuation = m_tex->Value(rec.u, rec.v, rec.point);
-    pdf = Dot(uvw.W(), scatterd.GetDirection()) / PI;
+                ScatterRecord& srec) const {
+    srec.attenuation = m_tex->Value(rec.u, rec.v, rec.point);
+    srec.pdf_ptr = std::make_shared<CosinePDF>(rec.normal);
+    srec.skip_pdf = false;
 
     return true;
 }
@@ -53,7 +46,9 @@ inline bool Lambertian::Scatter(const Ray& ray_in,
 inline double Lambertian::ScatteringPDF(const Ray& r_in,
                                         const HitRecord& rec,
                                         const Ray& scattered) const {
-    return (1 / (2 * PI));
+    double cos_theta = Dot(rec.normal, UnitVector(scattered.GetDirection()));
+    
+    return ((cos_theta < 0.0) ? 0.0 : (cos_theta / PI));
 }
 
 }

@@ -4,10 +4,18 @@
 
 #include "ray.hpp"
 #include "color.hpp"
+#include "pdf.hpp"
 
 namespace RayTracing {
 
 struct HitRecord;
+
+struct ScatterRecord {
+    Color attenuation;
+    Ray skip_pdf_ray;
+    std::shared_ptr<PDF> pdf_ptr;
+    bool skip_pdf;
+};
 
 class Material {
 public:
@@ -15,9 +23,7 @@ public:
 
     virtual bool Scatter(const Ray& ray_in,
                         const HitRecord& rec,
-                        Color& attenuation,
-                        Ray& scatterd,
-                        double& pdf) const;
+                        ScatterRecord& srec) const;
     virtual Color Emitted(const Ray& r_in, 
                         const HitRecord& rec, 
                         double u, double v, 
@@ -32,14 +38,10 @@ inline Material::~Material() {}
 
 inline bool Material::Scatter(const Ray& ray_in,
                         const HitRecord& rec,
-                        Color& attenuation,
-                        Ray& scatterd,
-                        double& pdf) const {
+                        ScatterRecord& srec) const {
     (void)ray_in;
     (void)rec;
-    (void)attenuation;
-    (void)scatterd;
-    (void)pdf;
+    (void)srec;
     
     return false;
 }

@@ -146,6 +146,13 @@ void BouncingSpheres() {
             std::vector<std::shared_ptr<RayTracing::Hittable>>{
             std::make_shared<RayTracing::BVHNode>(world)});
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
+
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
     double defocus_angle = 0.6;
@@ -164,7 +171,7 @@ void BouncingSpheres() {
     cam.SetBackground(RayTracing::Color(0.70, 0.80, 1.00));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -194,6 +201,14 @@ void CheckeredSpheres() {
         RayTracing::Point3(0.0, 10.0, 0.0), 10.0,
         std::make_shared<RayTracing::Lambertian>(checker)));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
+
+
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
     double defocus_angle = 0.0;
@@ -212,7 +227,7 @@ void CheckeredSpheres() {
     cam.SetBackground(RayTracing::Color(0.70, 0.80, 1.00));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -229,6 +244,13 @@ void Earth() {
     auto globe = std::make_shared<RayTracing::Sphere>(
                 RayTracing::Point3(0.0, 0.0, 0.0), 2.0, earth_surface);
     
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
+
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
     double defocus_angle = 0.0;
@@ -249,7 +271,7 @@ void Earth() {
     auto t1 = std::chrono::high_resolution_clock::now();
     cam.Render(RayTracing::HittableList(
             std::vector<std::shared_ptr<RayTracing::Hittable>>{globe}), 
-            true);
+            lights, true);
     
     auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -269,6 +291,13 @@ void PerlinSpheres() {
             RayTracing::Point3(0, 2, 0), 2, 
             std::make_shared<RayTracing::Lambertian>(pertext)));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
+    
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
     double defocus_angle = 0.0;
@@ -287,7 +316,7 @@ void PerlinSpheres() {
     cam.SetBackground(RayTracing::Color(0.70, 0.80, 1.00));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -332,6 +361,12 @@ void Quads() {
             RayTracing::Vec3(4, 0, 0), 
             RayTracing::Vec3(0, 0,-4), lower_teal));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
 
     double aspect_ratio = 1.0;
     double vfov = 80.0;
@@ -351,7 +386,7 @@ void Quads() {
     cam.SetBackground(RayTracing::Color(0.70, 0.80, 1.00));
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -381,6 +416,13 @@ void SimpleLight() {
     world.Add(std::make_shared<RayTracing::Sphere>(
             RayTracing::Point3(0, 7, 0), 2, difflight));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(), 
+                            RayTracing::Vec3(),
+                            RayTracing::Vec3(),
+                            empty_material);
+
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;
     double defocus_angle = 0.0;
@@ -398,7 +440,7 @@ void SimpleLight() {
 
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -457,16 +499,14 @@ void CornellBox() {
     box1 = std::make_shared<RayTracing::Translate>(box1, 
                             RayTracing::Vec3(265, 0, 295));
 
-    std::shared_ptr<RayTracing::Hittable> box2 = RayTracing::Box(
-                RayTracing::Point3(0, 0, 0),
-                RayTracing::Point3(165, 165, 165),
-                white);
-    box2 = std::make_shared<RayTracing::RotateY>(box2, -18);
-    box2 = std::make_shared<RayTracing::Translate>(box2, 
-                            RayTracing::Vec3(130, 0, 65));
+    auto glass = std::make_shared<RayTracing::Dielectric>(1.5);
+    auto sphere = std::make_shared<RayTracing::Sphere>(
+                    RayTracing::Point3(190, 90, 190),
+                    90,
+                    glass);
 
     world.Add(box1);
-    world.Add(box2);
+    world.Add(sphere);
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
@@ -480,7 +520,7 @@ void CornellBox() {
     double defocus_angle = 0.0;
     double focus_dist = 10.0;
     uint32_t image_width = 600;
-    uint32_t samples_per_pixel = 10;
+    uint32_t samples_per_pixel = 100;
     uint32_t max_depth = 50;
     RayTracing::Point3 look_from(278, 278, -800);
     RayTracing::Point3 look_at(278, 278, 0);
@@ -564,6 +604,13 @@ void CornellSmoke() {
     world.Add(std::make_shared<RayTracing::ConstantMedium>(
                 box2, 0.01, RayTracing::Color(1, 1, 1)));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(343, 554, 332), 
+                            RayTracing::Vec3(-130, 0, 0),
+                            RayTracing::Vec3(0, 0, -105),
+                            empty_material);
+
     double aspect_ratio = 1.0;
     double vfov = 40.0;
     double defocus_angle = 0.0;
@@ -580,7 +627,7 @@ void CornellSmoke() {
                         look_from, look_at, vup);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;
@@ -679,6 +726,13 @@ void FinalScene(uint32_t image_width,
                     std::make_shared<RayTracing::BVHNode>(boxes2), 15.0),
                     RayTracing::Vec3(-100, 270, 395)));
 
+    // ligth sources
+    auto empty_material = std::shared_ptr<RayTracing::Material>();
+    RayTracing::Quad lights(RayTracing::Point3(123, 554, 147),
+                            RayTracing::Vec3(300, 0, 0),
+                            RayTracing::Vec3(0, 0, 265),
+                            empty_material);
+
     double aspect_ratio = 1.0;
     double vfov = 40.0;
     double defocus_angle = 0.0;
@@ -692,7 +746,7 @@ void FinalScene(uint32_t image_width,
                         look_from, look_at, vup);
 
     auto t1 = std::chrono::high_resolution_clock::now();
-    cam.Render(world, true);
+    cam.Render(world, lights, true);
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::chrono::duration<double, std::milli> ms = t2 - t1;

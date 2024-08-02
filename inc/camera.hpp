@@ -25,7 +25,7 @@ public:
 
     void Render(const Hittable& world, const Hittable& lights);
     void Render(const Hittable& world, const Hittable& lights, bool parallel);
-    void Render(const Hittable& world, bool parallel);
+    // void Render(const Hittable& world, bool parallel);
 
 private:
     Point3 m_center;                    // Camera Center
@@ -56,9 +56,9 @@ private:
                     uint32_t depth, 
                     const Hittable& world, 
                     const Hittable& lights) const;
-    Color RayColor(const Ray& ray, 
-                    uint32_t depth, 
-                    const Hittable& world) const;
+    // Color RayColor(const Ray& ray, 
+    //                 uint32_t depth, 
+    //                 const Hittable& world) const;
     Ray GetRay(int i, int j, int s_i, int s_j) const;
     Point3 DefocusDiskSample() const;
     static Vec3 SampleSqure();

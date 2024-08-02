@@ -7,6 +7,7 @@
 #include "material.hpp"
 #include "texture.hpp"
 #include "solid_color.hpp"
+#include "sphere_pdf.hpp"
 
 namespace RayTracing {
 
@@ -17,9 +18,7 @@ public:
 
     bool Scatter(const Ray& ray_in,
                 const HitRecord& rec,
-                Color& attenuation,
-                Ray& scatterd,
-                double& pdf) const override;
+                ScatterRecord& srec) const override;
     double ScatteringPDF(const Ray& r_in,
                         const HitRecord& rec,
                         const Ray& scattered) const override;
@@ -38,12 +37,10 @@ m_tex(tex)
 
 inline bool Isotropic::Scatter(const Ray& ray_in,
                                 const HitRecord& rec,
-                                Color& attenuation,
-                                Ray& scatterd,
-                                double& pdf) const {
-    scatterd = Ray(rec.point, RandomUnitVector(), ray_in.GetTime());
-    attenuation = m_tex->Value(rec.u, rec.v, rec.point);
-    pdf = 1 / (4 * PI);
+                                ScatterRecord& srec) const {
+    srec.attenuation = m_tex->Value(rec.u, rec.v, rec.point);
+    srec.pdf_ptr = std::make_shared<SpherePDF>();
+    srec.skip_pdf = false;
 
     return true;
 }
