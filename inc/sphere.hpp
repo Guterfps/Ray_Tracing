@@ -110,7 +110,7 @@ inline std::pair<double, double> Sphere::GetSphereUV(const Point3& p) {
 inline Vec3 Sphere::RandomToSphere(double radius, double distance_squared) {
     double r1 = RandomDouble();
     double r2 = RandomDouble();
-    double z = 1 + r2 * (std::sqrt(1 - radius * radius / distance_squared));
+    double z = 1 + r2 * (std::sqrt(1 - radius * radius / distance_squared) - 1);
 
     double phi = 2 * PI * r1;
     double x = std::cos(phi) * std::sqrt(1 - z * z);

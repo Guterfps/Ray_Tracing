@@ -510,10 +510,19 @@ void CornellBox() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(343, 554, 332), 
+    RayTracing::HittableList lights;
+    auto quad_light = std::make_shared<RayTracing::Quad>(
+                            RayTracing::Point3(343, 554, 332), 
                             RayTracing::Vec3(-130, 0, 0),
                             RayTracing::Vec3(0, 0, -105),
                             empty_material);
+    auto sphere_light = std::make_shared<RayTracing::Sphere>(
+                            RayTracing::Point3(190, 90, 190),
+                            90,
+                            empty_material);
+
+    lights.Add(quad_light);
+    lights.Add(sphere_light);
 
     double aspect_ratio = 1.0;
     double vfov = 40.0;

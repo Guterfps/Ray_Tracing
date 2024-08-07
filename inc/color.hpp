@@ -73,6 +73,17 @@ inline void WriteColor(std::ostream& out, const Color& pixel_color) {
     double g = pixel_color.GetG();
     double b = pixel_color.GetB();
 
+    // Replace NaN components with zero
+    if (r != r) {
+        r = 0.0;
+    }
+    if (g != g) {
+        g = 0.0;
+    }
+    if (b != b) {
+        b = 0.0;
+    }
+    
     r = LinearToGamma(r);
     g = LinearToGamma(g);
     b = LinearToGamma(b);

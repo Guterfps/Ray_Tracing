@@ -23,6 +23,8 @@ public:
             const Interval& ray_t,
             HitRecord& rec) const override;
     AABB BoundingBox() const override;
+    double PDFValue(const Point3& origin, const Vec3& direction) const override;
+    Vec3 Random(const Point3& origin) const override;
 
 private:
     AABB m_bbox;
@@ -51,6 +53,24 @@ inline size_t HittableList::GetSize() const {
 
 inline AABB HittableList::BoundingBox() const {
     return m_bbox;
+}
+
+inline double HittableList::PDFValue(const Point3& origin, 
+                                    const Vec3& direction) const {
+    double weight = 1.0 / m_objects.size();
+    double sum = 0.0;
+
+    for (const auto& object : m_objects) {
+        sum += (weight * object->PDFValue(origin, direction));
+    }
+
+    return sum;
+}
+
+inline Vec3 HittableList::Random(const Point3& origin) const {
+    int int_size = static_cast<int>(m_objects.size());
+
+    return m_objects[RandomInt(0, int_size - 1)]->Random(origin);
 }
 
 }
