@@ -148,9 +148,9 @@ void BouncingSpheres() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
+    RayTracing::Quad lights(RayTracing::Point3(13.0, 2.0, 3.0), 
+                            RayTracing::Vec3(400.0, 0.0, 0.0),
+                            RayTracing::Vec3(0.0, 225.0, 0.0),
                             empty_material);
 
     double aspect_ratio = 16.0 / 9.0;
@@ -203,9 +203,9 @@ void CheckeredSpheres() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
+    RayTracing::Quad lights(RayTracing::Point3(13.0, 2.0, 3.0), 
+                            RayTracing::Vec3(400.0, 0.0, 0.0),
+                            RayTracing::Vec3(0.0, 225.0, 0.0),
                             empty_material);
 
 
@@ -246,9 +246,9 @@ void Earth() {
     
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
+    RayTracing::Quad lights(RayTracing::Point3(0.0, 0.0, 12.0), 
+                            RayTracing::Vec3(400.0, 0.0, 0.0),
+                            RayTracing::Vec3(0.0, 225.0, 0.0),
                             empty_material);
 
     double aspect_ratio = 16.0 / 9.0;
@@ -293,9 +293,9 @@ void PerlinSpheres() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
+    RayTracing::Quad lights(RayTracing::Point3(13.0, 2.0, 3.0), 
+                            RayTracing::Vec3(400.0, 0.0, 0.0),
+                            RayTracing::Vec3(0.0, 225.0, 0.0),
                             empty_material);
     
     double aspect_ratio = 16.0 / 9.0;
@@ -363,9 +363,9 @@ void Quads() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
+    RayTracing::Quad lights(RayTracing::Point3(0.0, 0.0, 9.0), 
+                            RayTracing::Vec3(400.0, 0.0, 0.0),
+                            RayTracing::Vec3(0.0, 225.0, 0.0),
                             empty_material);
 
     double aspect_ratio = 1.0;
@@ -418,10 +418,14 @@ void SimpleLight() {
 
     // ligth sources
     auto empty_material = std::shared_ptr<RayTracing::Material>();
-    RayTracing::Quad lights(RayTracing::Point3(), 
-                            RayTracing::Vec3(),
-                            RayTracing::Vec3(),
-                            empty_material);
+    RayTracing::HittableList lights;
+    lights.Add(std::make_shared<RayTracing::Quad>(
+            RayTracing::Point3(3, 1, -2),
+            RayTracing::Vec3(2, 0, 0),
+            RayTracing::Vec3(0, 2, 0),
+            empty_material));
+    lights.Add(std::make_shared<RayTracing::Sphere>(
+            RayTracing::Point3(0, 7, 0), 2, empty_material));
 
     double aspect_ratio = 16.0 / 9.0;
     double vfov = 20.0;

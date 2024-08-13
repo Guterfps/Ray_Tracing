@@ -62,13 +62,13 @@ Code example for a Cornell Box:
         RayTracing::HittableList world;
 
         auto red = std::make_shared<RayTracing::Lambertian>(
-                    RayTracing::Color(0.65, 0.05, 0.05));
+                        RayTracing::Color(0.65, 0.05, 0.05));
         auto white = std::make_shared<RayTracing::Lambertian>(
-                    RayTracing::Color(0.73, 0.73, 0.73));
+                        RayTracing::Color(0.73, 0.73, 0.73));
         auto green = std::make_shared<RayTracing::Lambertian>(
-                    RayTracing::Color(0.12, 0.45, 0.15));
+                        RayTracing::Color(0.12, 0.45, 0.15));
         auto light = std::make_shared<RayTracing::DiffuseLight>(
-                    RayTracing::Color(15, 15, 15));
+                        RayTracing::Color(15, 15, 15));
 
         world.Add(std::make_shared<RayTracing::Quad>(
                 RayTracing::Point3(555, 0, 0),
@@ -102,41 +102,56 @@ Code example for a Cornell Box:
                 white));
 
         std::shared_ptr<RayTracing::Hittable> box1 = RayTracing::Box(
-                    RayTracing::Point3(0, 0, 0),
-                    RayTracing::Point3(165, 330, 165),
-                    white);
+                        RayTracing::Point3(0, 0, 0),
+                        RayTracing::Point3(165, 330, 165),
+                        white);
         box1 = std::make_shared<RayTracing::RotateY>(box1, 15);
         box1 = std::make_shared<RayTracing::Translate>(box1, 
                                 RayTracing::Vec3(265, 0, 295));
 
-        std::shared_ptr<RayTracing::Hittable> box2 = RayTracing::Box(
-                    RayTracing::Point3(0, 0, 0),
-                    RayTracing::Point3(165, 165, 165),
-                    white);
-        box2 = std::make_shared<RayTracing::RotateY>(box2, -18);
-        box2 = std::make_shared<RayTracing::Translate>(box2, 
-                                RayTracing::Vec3(130, 0, 65));
+        auto glass = std::make_shared<RayTracing::Dielectric>(1.5);
+        auto sphere = std::make_shared<RayTracing::Sphere>(
+                        RayTracing::Point3(190, 90, 190),
+                        90,
+                        glass);
 
         world.Add(box1);
-        world.Add(box2);
+        world.Add(sphere);
+
+        // ligth sources
+        auto empty_material = std::shared_ptr<RayTracing::Material>();
+        RayTracing::HittableList lights;
+        auto quad_light = std::make_shared<RayTracing::Quad>(
+                                RayTracing::Point3(343, 554, 332), 
+                                RayTracing::Vec3(-130, 0, 0),
+                                RayTracing::Vec3(0, 0, -105),
+                                empty_material);
+        auto sphere_light = std::make_shared<RayTracing::Sphere>(
+                                RayTracing::Point3(190, 90, 190),
+                                90,
+                                empty_material);
+
+        lights.Add(quad_light);
+        lights.Add(sphere_light);
 
         double aspect_ratio = 1.0;
         double vfov = 40.0;
         double defocus_angle = 0.0;
         double focus_dist = 10.0;
         uint32_t image_width = 600;
-        uint32_t samples_per_pixel = 200;
+        uint32_t samples_per_pixel = 100;
         uint32_t max_depth = 50;
         RayTracing::Point3 look_from(278, 278, -800);
         RayTracing::Point3 look_at(278, 278, 0);
         RayTracing::Vec3 vup(0, 1, 0);
 
-        RayTracing::Camera cam(aspect_ratio, vfov, 
-                                defocus_angle,focus_dist,
+        RayTracing::Camera cam(aspect_ratio, vfov, defocus_angle, focus_dist,
                                 image_width, samples_per_pixel, max_depth,
                                 look_from, look_at, vup);
 
-        cam.Render(world, true);
+
+        cam.Render(world, lights, true);
+
 
         return 0;
     }
