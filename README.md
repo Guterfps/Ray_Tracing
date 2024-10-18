@@ -163,7 +163,7 @@ You can run the examples from the src/main.cpp file like this:
 ```
 
 Image showcasing some of the fetures:
-![alt text](/out/image.ppm)
+![alt text](/images/image.png)
 
 
 ## Project Structure
